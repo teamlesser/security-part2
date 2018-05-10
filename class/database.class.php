@@ -33,18 +33,31 @@ class Database {
      * Private due to class being singleton.
      */
     private function __construct(){
-        // Gets Config-instance
-        $conf = Config::getInstance();
-
-        // Constructs connection string and sets it to static.
-        $connStr = "host=" . $conf->getSetting("host") .
-            " port=" . $conf->getSetting("port") .
-            " dbname=" . $conf->getSetting("dbname") .
-            " user=" . $conf->getSetting("user") .
-            " password=" . $conf->getSetting("password");
-
-        self::$connectionString = $connStr;
+    	self::$connectionString = $this->makeConnectionString();
     }
+
+
+	/**
+	 * Make connection string.
+	 * @returns string connection string or null if any of the necessary
+	 * values required for the connection is not set
+	 */
+	private function makeConnectionString(): string{
+		// Gets Config-instance
+		$conf = Config::getInstance();
+
+		$host = $conf->getSetting("host");
+		$port = $conf->getSetting("port");
+		$dbname = $conf->getSetting("dbname");
+		$user = $conf->getSetting("user");
+		$password = $conf->getSetting("password");
+
+		if($host !== null && $port !== null && $dbname !== null
+		  && $user !== null && $password !== null){
+			return "host=$host port=$port dbname=$dbname user=$user password=$password";
+		}
+		return null;
+}
 
     /**
      * Returns the current instance if one exists,
@@ -64,8 +77,11 @@ class Database {
      * @return resource The connection to the server if it succeeded.
      */
     private function connect(){
-        $dbconn = pg_connect(self::$connectionString);
-        return $dbconn;
+    	if(self::$connectionString !== null) {
+		    $dbconn = pg_connect(self::$connectionString);
+		    return $dbconn;
+	    }
+	    return null;
     }
 
     /**
@@ -79,7 +95,8 @@ class Database {
     /**
      * Executes a simple query without parameters.
      * @param $queryString string The query to be asked.
-     * @return bool|resource A result set or false = failed to connect or empty result.
+     * @return null|resource A result set or false = failed to connect or empty
+     * result.
      */
     public function doSimpleQuery($queryString){
         // Connects
@@ -97,14 +114,15 @@ class Database {
         }
 
         // Failed to connect
-        return false;
+        return null;
     }
 
     /**
      * Queries the PostgreSQL database with a parameterized string.
      * @param $queryString string The query string.
      * @param $params array The parameters for the string.
-     * @return bool|resource A result set or false = failed to connect or empty result.
+     * @return null|resource A result set or false = failed to connect or empty
+     * result.
      */
     public function doParamQuery($queryString, $params){
         // Connects
@@ -122,7 +140,7 @@ class Database {
         }
 
         // Failed to connect
-        return false;
+        return null;
     }
 }
 
