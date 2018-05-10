@@ -35,6 +35,8 @@ TABLESPACE = pg_default;
 -- It will ask you to sign in with the new user. Use the password from the Trello board!
 -- After that you can execute the queries below.
 
+-- DROP SCHEMA securitylab CASCADE;
+
 CREATE SCHEMA securitylab
 AUTHORIZATION group4lab;
 
@@ -45,7 +47,8 @@ CREATE TABLE securitylab.users(
   id SERIAL NOT NULL PRIMARY KEY,
   username VARCHAR(256) NOT NULL UNIQUE CHECK (username <> ''::text),
   password VARCHAR(256) NOT NULL CHECK (password <> ''::text),
-  email VARCHAR(256) NOT NULL UNIQUE CHECK (email <> ''::text)
+  email VARCHAR(256) NOT NULL UNIQUE CHECK (email <> ''::text),
+  verified BOOLEAN NOT NULL
 );
 
 -- Creates message-table
