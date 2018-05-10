@@ -41,7 +41,7 @@ class Config {
      * otherwise creates it.
      * @return Config The single instance of this class.
      */
-    public static function getInstance(){
+    public static function getInstance(): Config{
         if (!self::$instance){
             self::$instance = new self();
         }
@@ -52,13 +52,14 @@ class Config {
     /**
      * Gets the value for a setting.
      * @param $setting string The name of the setting.
-     * @return bool|mixed Either the value for the key or false (setting is not set).
+     * @return string|null Either the value for the key or null (setting is not
+     * set).
      */
-    public function getSetting($setting){
+    public function getSetting($setting): string{
         if (isset(self::$settings[$setting])) {
             return self::$settings[$setting];
         }
 
-        return false;
+        return null;
     }
 }
