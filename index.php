@@ -7,7 +7,7 @@
 + * Desc: The start page where a user can login, navigate to register.php and resetpassword.php
 
 + */
-$title = "SecurityLab - Group four";
+$title = "Security Lab - Group Four";
 ?>
 
 <!--
@@ -21,9 +21,9 @@ $title = "SecurityLab - Group four";
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>DT167G- <?php echo $title ?></title>
+        <title>DT167G - <?php echo $title ?></title>
         <link rel="stylesheet" href="css/style.css"/>
-        <script src="js/main.js"></script>
+        <script src="js/login.js"></script>
     </head>
 
     <body>
@@ -40,9 +40,9 @@ $title = "SecurityLab - Group four";
             <br>
             <button id="login-button">Login</button>
             <br>
-            <a href="user/register.php">New user?</a>
+            <a href="register.php">New user?</a>
             <br>
-            <a href="user/resetpassword.php">Forgot password?</a>
+            <a href="resetpassword.php">Forgot password?</a>
         </div>
 
 
