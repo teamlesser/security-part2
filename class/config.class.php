@@ -33,7 +33,7 @@ class Config {
      */
     private function __construct(){
         // config.php returns an array
-        self::$settings = include(dirname(__DIR__) . "/config.php");
+        self::$settings = include(dirname(__DIR__) . "utils/config.php");
     }
 
     /**
