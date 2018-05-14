@@ -48,7 +48,11 @@ CREATE TABLE securitylab.users(
   username VARCHAR(256) NOT NULL UNIQUE CHECK (username <> ''::text),
   password VARCHAR(256) NOT NULL CHECK (password <> ''::text),
   email VARCHAR(256) NOT NULL UNIQUE CHECK (email <> ''::text),
-  verified BOOLEAN NOT NULL
+  verified BOOLEAN NOT NULL,
+  verifyToken VARCHAR(256) DEFAULT NULL, 
+  verifyTokenExpire TIMESTAMP DEFAULT NULL,
+  resetToken VARCHAR(256) DEFAULT NULL,
+  resetTokenExpire TIMESTAMP DEFAULT NULL
 );
 
 -- Creates message-table
