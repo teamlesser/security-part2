@@ -1,6 +1,20 @@
 <?PHP
+/**
++ * File: index.php
+
++ * Date: 2018-05-14
+
++ * Desc: The start page where a user can login, navigate to register.php and resetpassword.php
+
++ */
 $title = "SecurityLab - Group four";
 ?>
+
++/*******************************************************************************
+
++* HTML section starts here
+
++******************************************************************************/
 <!DOCTYPE html>
 <html lang="sv-SE">
     <head>
