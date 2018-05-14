@@ -5,11 +5,6 @@
  * Desc: Page where a new user can register(create a username and password)
  */
 
-/*
-Does this need to be a php-file or can it be just a plain html-file?
-*/
-
-
 /*******************************************************************************
 * HTML section starts here
 ******************************************************************************/
