@@ -6,8 +6,8 @@
  */
 
 /*******************************************************************************
-* HTML section starts here
-******************************************************************************/
+ * HTML section starts here
+ ******************************************************************************/
 ?>
 <!DOCTYPE html>
 <html lang="sv-SE">
@@ -26,11 +26,19 @@
     <div>
         <h2>Register</h2>
         <form id="loginForm">
-            <input type="text" placeholder="Username" id="username-field">
-            <input type="password" placeholder="Password" id="password-field">
-            <input type="password" placeholder="Re-type password" id="password-again-field">
-            <input type="email" placeholder="E-mail" id="email-field">
-            <button type="button" id="register-button">Register</button>
+            <label for="username-field">Username:
+                <input type="text" placeholder="Username" id="username-field" name="username">
+            </label>
+            <label for="password-field">Password:
+                <input type="password" placeholder="Password" id="password-field" name="password">
+            </label>
+            <label for="password-again-field">Confirm your password:
+                <input type="password" placeholder="Re-type password" id="password-again-field" name="password_again">
+            </label>
+            <label for="email-field">Email:
+                <input type="email" placeholder="E-mail" id="email-field" name="email">
+            </label>
+            <button type="button" id="register-button" name="registerButton">Register</button>
         </form>
     </div>
 
