@@ -10,11 +10,12 @@
 $title = "SecurityLab - Group four";
 ?>
 
-+/*******************************************************************************
+<!--
 
-+* HTML section starts here
+**** HTML-SECTION STARTS HERE ****
 
-+******************************************************************************/
+-->
+
 <!DOCTYPE html>
 <html lang="sv-SE">
     <head>
@@ -31,6 +32,7 @@ $title = "SecurityLab - Group four";
     </header>
 
     <main>
+
         <h1>Login</h1>
         <div id="login-div">
             <input id="email-field" placeholder="E-mail">
