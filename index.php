@@ -38,9 +38,9 @@ $title = "SecurityLab - Group four";
             <br>
             <button id="login-button">Login</button>
             <br>
-            <a href="register.php">New user?</a>
+            <a href="user/register.php">New user?</a>
             <br>
-            <a href="resetpassword.php">Forgot password?</a>
+            <a href="user/resetpassword.php">Forgot password?</a>
         </div>
 
 
