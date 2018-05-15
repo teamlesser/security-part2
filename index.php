@@ -35,14 +35,15 @@ $title = "Security Lab - Group Four";
 
         <h1>Login</h1>
         <div id="login-div">
-            <input id="email-field" placeholder="E-mail">
-            <input id="password-field" placeholder="Password">
-            <br>
+            <form id="loginForm">
+                <input id="email-field" placeholder="E-mail">
+                <input id="password-field" placeholder="Password">
+            </form>
             <button id="login-button">Login</button>
             <br>
             <a href="register.php">New user?</a>
             <br>
-            <a href="resetpassword.php">Forgot password?</a>
+            <a href="user/resetpassword.php">Forgot password?</a>
         </div>
 
 
