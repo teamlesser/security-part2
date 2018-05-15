@@ -105,8 +105,6 @@ function processLogin(){
         // Handles response message
         var response = JSON.parse(this.responseText);
 
-        console.log(this.responseText);
-
         byId("return-message").innerHTML = response.message;
     }
 

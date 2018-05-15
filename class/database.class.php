@@ -38,7 +38,6 @@ class Database {
     	self::$connectionString = $this->makeConnectionString();
     }
 
-
 	/**
 	 * Make connection string.
 	 * @returns string connection string or null if any of the necessary

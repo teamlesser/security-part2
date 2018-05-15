@@ -8,8 +8,6 @@
 
 + */
 
-session_start();
-
 $title = "Security Lab - Group Four";
 ?>
 

@@ -1,7 +1,5 @@
 <?php
 
-session_start();
-
 // Util (autoloader)
 include_once "../utils/util.php";
 
@@ -20,7 +18,7 @@ $response = array(
  * @return bool If the email exists in the database.
  */
 function emailExists($email): bool{
-    $query = "SELECT EXISTS (SELECT * FROM securitylab.users WHERE id = $1);";
+    $query = "SELECT EXISTS (SELECT * FROM securitylab.users WHERE email = $1);";
     $param = array($email);
 
     // Result only returns a boolean
@@ -88,8 +86,10 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
                 // Create and give the user a JWT (token) as a session var
                 $token = array();
-                $token['email'] = $email;
-                $_SESSION["token"] = JWT::encode($token, base64_decode(Config::getInstance()->getSetting("JWTSecretKey")));
+                $token["email"] = $email;
+                setcookie("logged_in", JWT::encode($token,
+                    base64_decode(Config::getInstance()->getSetting("JWTSecretKey"))),
+                    0, "/", "", false, true);
 
                 // Set user messages
                 $response["message"] = "Login succeeded.";
