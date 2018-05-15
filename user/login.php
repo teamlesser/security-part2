@@ -1,5 +1,8 @@
 <?php
 
+// JWT Helper
+require_once "../vendor/jwt_helper.php";
+
 // Response array, set to negative values at first.
 $response = array(
     "status" => "error",
@@ -79,10 +82,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             // Login succeeded-path
             if ($emailResult && $passwordResult){
 
-                // Create and give the user a JWT (token)
+                // Create and give the user a JWT (token) as a session var
+                $token = array();
+                $token['email'] = $email;
+                $_SESSION["token"] = JWT::encode($token, base64_decode(Config::getInstance()->getSetting("JWTSecretKey")));
+
+                // Set user messages
                 $result["message"] = "Login succeeded.";
                 $result["status"] = "success";
-
             }
 
             // Login failed-path
