@@ -28,25 +28,27 @@ $title = "Security Lab - Group Four";
 
     <body>
     <header>
-
     </header>
 
     <main>
 
-        <h1>Login</h1>
+
         <div id="login-div">
-            <input id="email-field" placeholder="E-mail">
-            <input id="password-field" placeholder="Password">
+            <h1>Login</h1>
+            <form id="loginForm">
+                <input id="email-field" placeholder="E-mail">
+                <input id="password-field" placeholder="Password">
+            </form>
             <br>
             <button id="login-button">Login</button>
             <br>
-            <a href="register.php">New user?</a>
+            <a href="user/register.php">New user?</a>
             <br>
-            <a href="resetpassword.php">Forgot password?</a>
+            <a href="user/resetpassword.php">Forgot password?</a>
         </div>
 
-
-        <div id="return-message"></div>
+        <br>
+        <div id="return-message">aa</div>
 
     </main>
 
