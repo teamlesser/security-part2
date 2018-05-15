@@ -1,5 +1,10 @@
 <?php
 
+session_start();
+
+// Util (autoloader)
+include_once "../utils/util.php";
+
 // JWT Helper
 require_once "../vendor/jwt_helper.php";
 
@@ -18,13 +23,12 @@ function emailExists($email): bool{
     $query = "SELECT EXISTS (SELECT * FROM securitylab.users WHERE id = $1);";
     $param = array($email);
 
+    // Result only returns a boolean
     $db = Database::getInstance();
     $result = $db->doParamQuery($query, $param);
-    $exists = pg_fetch_result($result, 0, 0);
-    pg_free_result($result);
 
     // "t" is true, "f" is false
-    if ($exists == null || $exists == "f"){
+    if ($result == null || $result == "f"){
         return false;
     } else {
         return true;
@@ -61,18 +65,18 @@ function passwordVerifies($email, $password): bool{
 if($_SERVER["REQUEST_METHOD"] == "POST"){
 
     // Decodes JSON from POST
-    $input = json_decode(stripslashes(file_get_contents("php://input")));
+    $input = json_decode(file_get_contents('php://input'));
 
     // Checks that required fields aren't empty
-    if (!empty($input["email"]) && !empty($input["password"])) {
+    if (!empty($input->email) && !empty($input->password)) {
 
         // Checks that e-mail has correct format
         $emailRegex = "/[\w]+@[\w]+\.[a-zA-Z]+/";
-        if (preg_match($emailRegex, $input["email"])){
+        if (preg_match($emailRegex, $input->email)){
 
             // Sets the values to variables
-            $email = htmlspecialchars($input["email"]);
-            $password = htmlspecialchars($input["password"]);
+            $email = htmlspecialchars($input->email);
+            $password = htmlspecialchars($input->password);
 
             // Queries the database to see if both are valid
             // Both queries are done regardless if the e-mail exists to avoid timing attacks
@@ -88,24 +92,25 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 $_SESSION["token"] = JWT::encode($token, base64_decode(Config::getInstance()->getSetting("JWTSecretKey")));
 
                 // Set user messages
-                $result["message"] = "Login succeeded.";
-                $result["status"] = "success";
+                $response["message"] = "Login succeeded.";
+                $response["status"] = "success";
             }
 
             // Login failed-path
             else {
-                $result["message"] = "Login failed.";
+                $response["message"] = "Login failed.";
             }
         }
 
         else {
-            $result["message"] = "Wrong format on e-mail.";
+            $response["message"] = "Wrong format on e-mail.";
         }
     }
 
     else {
-        $result["message"] = "One or more fields were empty.";
+        $response["message"] = "One or more fields were empty.";
     }
+
 }
 
 // Sends response as JSON

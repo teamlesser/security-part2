@@ -10,6 +10,8 @@
  * Date: 2018-05-08
  ******************************************************************************/
 
+include_once "../utils/util.php";
+
 /**
  * Class Database
  * Handles connections and parameterized

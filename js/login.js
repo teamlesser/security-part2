@@ -66,8 +66,11 @@ function doLogin() {
             // EventListener for server state change
             xhr.addEventListener('readystatechange', processLogin, false);
 
+            /*
             email = encodeURIComponent(email);
             password = encodeURIComponent(password);
+*/
+
             // Message is composed and sent as JSON
             var data = JSON.stringify({"email": email, "password": password});
 
@@ -95,11 +98,15 @@ function doLogin() {
 function processLogin(){
 
     if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
+
         // Removes the EventListener since the xhr-object is reused
         xhr.removeEventListener("readystatechange", processLogin, false);
 
         // Handles response message
         var response = JSON.parse(this.responseText);
+
+        console.log(this.responseText);
+
         byId("return-message").innerHTML = response.message;
     }
 

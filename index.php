@@ -7,6 +7,9 @@
 + * Desc: The start page where a user can login, navigate to register.php and resetpassword.php
 
 + */
+
+session_start();
+
 $title = "Security Lab - Group Four";
 ?>
 
@@ -35,8 +38,8 @@ $title = "Security Lab - Group Four";
 
         <h1>Login</h1>
         <div id="login-div">
-            <input id="email-field" placeholder="E-mail">
-            <input id="password-field" placeholder="Password">
+            <input id="email-field" placeholder="E-mail" type="email">
+            <input id="password-field" placeholder="Password" type="password">
             <br>
             <button id="login-button">Login</button>
             <br>
