@@ -1,0 +1,106 @@
+<?php
+
+// Response array, set to negative values at first.
+$response = array(
+    "status" => "error",
+    "message" => "error"
+);
+
+/**
+ * Checks if an e-mail exists in the database and returns a bool.
+ * @param $email string The e-mail to search for.
+ * @return bool If the email exists in the database.
+ */
+function emailExists($email): bool{
+    $query = "SELECT EXISTS (SELECT * FROM securitylab.users WHERE id = $1);";
+    $param = array($email);
+
+    $db = Database::getInstance();
+    $result = $db->doParamQuery($query, $param);
+    $exists = pg_fetch_result($result, 0, 0);
+    pg_free_result($result);
+
+    // "t" is true, "f" is false
+    if ($exists == null || $exists == "f"){
+        return false;
+    } else {
+        return true;
+    }
+}
+
+/**
+ * This function checks whether or not the supplied password
+ * matches the one for the user in the database with password_verify().
+ * @param $email string User email. Used in select.
+ * @param $password string Password that is compared with password_verify() against database hash.
+ * @return bool If the password existed/verified.
+ */
+function passwordVerifies($email, $password): bool{
+    // Query for the password hash for the email
+    $query = "SELECT password FROM securitylab.users WHERE email = $1;";
+    $param = array($email);
+
+    $db = Database::getInstance();
+    $result = $db->doParamQuery($query, $param);
+    $passwordHash = pg_fetch_result($result, 0, 0);
+    pg_free_result($result);
+
+    // If a password does not exist for the user, simply return false.
+    if ($passwordHash == null){
+        return false;
+    }
+
+    // Returns the result of the hash verification
+    return password_verify($password, $passwordHash);
+}
+
+// Checks that request method is POST
+if($_SERVER["REQUEST_METHOD"] == "POST"){
+
+    // Decodes JSON from POST
+    $input = json_decode(stripslashes(file_get_contents("php://input")));
+
+    // Checks that required fields aren't empty
+    if (!empty($input["email"]) && !empty($input["password"])) {
+
+        // Checks that e-mail has correct format
+        $emailRegex = "/[\w]+@[\w]+\.[a-zA-Z]+/";
+        if (preg_match($emailRegex, $input["email"])){
+
+            // Sets the values to variables
+            $email = htmlspecialchars($input["email"]);
+            $password = htmlspecialchars($input["password"]);
+
+            // Queries the database to see if both are valid
+            // Both queries are done regardless if the e-mail exists to avoid timing attacks
+            $emailResult = emailExists($email);
+            $passwordResult = passwordVerifies($email, $password);
+
+            // Login succeeded-path
+            if ($emailResult && $passwordResult){
+
+                // Create and give the user a JWT (token)
+                $result["message"] = "Login succeeded.";
+                $result["status"] = "success";
+
+            }
+
+            // Login failed-path
+            else {
+                $result["message"] = "Login failed.";
+            }
+        }
+
+        else {
+            $result["message"] = "Wrong format on e-mail.";
+        }
+    }
+
+    else {
+        $result["message"] = "One or more fields were empty.";
+    }
+}
+
+// Sends response as JSON
+header('Content-Type: application/json');
+echo json_encode($response);

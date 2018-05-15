@@ -19,5 +19,8 @@ return array(
     "dbname" => "securitylab",
     "user" => "group4lab",
     "password" => "s`yWSqL[Zh6@6u[G",
-    "debug" => true
+    "debug" => true,
+
+    // JWT Secret Key (base 64 encoded)
+    "JWTSecretKey" => "VGZlTUs4RHhoTnQ1WHkxbVpvYk9EQTZqdnhQeDhVUkxxU3M3bWU5VU5wdTdqRk8zY3JrV3k1UkV4S3NScTlO"
 );
