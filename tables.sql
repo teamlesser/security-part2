@@ -35,6 +35,7 @@ TABLESPACE = pg_default;
 -- It will ask you to sign in with the new user. Use the password from the Trello board!
 -- After that you can execute the queries below.
 
+-- To drop schema and all data in them, use:
 -- DROP SCHEMA securitylab CASCADE;
 
 CREATE SCHEMA securitylab
@@ -48,12 +49,29 @@ CREATE TABLE securitylab.users(
   username VARCHAR(256) NOT NULL UNIQUE CHECK (username <> ''::text),
   password VARCHAR(256) NOT NULL CHECK (password <> ''::text),
   email VARCHAR(256) NOT NULL UNIQUE CHECK (email <> ''::text),
-  verified BOOLEAN NOT NULL,
-  verifyToken VARCHAR(256) DEFAULT NULL, 
-  verifyTokenExpire TIMESTAMP DEFAULT NULL,
-  resetToken VARCHAR(256) DEFAULT NULL,
-  resetTokenExpire TIMESTAMP DEFAULT NULL
+  verified BOOLEAN DEFAULT FALSE
 );
+
+-- Creates verify-table
+-- Used when verifying a newly registered user.
+-- Default for verifyTokenExpire is one hour from current_timestamp (if not entered manually).
+CREATE TABLE securitylab.verify(
+  id SERIAL NOT NULL PRIMARY KEY,
+  user_id INTEGER UNIQUE NOT NULL REFERENCES securitylab.users(id),
+  verify_token VARCHAR(256) NOT NULL CHECK (verify_token <> ''::text),
+  verify_token_expire TIMESTAMP DEFAULT CURRENT_TIMESTAMP + interval '24 hour'
+);
+
+-- Creates reset-table
+-- Used when resetting a user's password.
+-- Default for resetTokenExpire is one hour from current_timestamp (if not entered manually).
+CREATE TABLE securitylab.reset(
+  id SERIAL NOT NULL PRIMARY KEY,
+  user_id INTEGER UNIQUE NOT NULL REFERENCES securitylab.users(id),
+  reset_token VARCHAR(256) NOT NULL CHECK (reset_token <> ''::text),
+  reset_token_expire TIMESTAMP DEFAULT CURRENT_TIMESTAMP + interval '24 hour'
+);
+
 
 -- Creates message-table
 -- If a timestamp is not supplied for date, it picks the current time.
