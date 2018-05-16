@@ -47,7 +47,7 @@ function main(){
 }
 
 /**
- * Sends a POST to login.php that will attempt to login an user.
+ * Sends a POST to processLogin.php that will attempt to login an user.
  * Gets values from email and password fields and passes it on to server.
  */
 function doLogin() {
@@ -74,7 +74,7 @@ function doLogin() {
             // Message is composed and sent as JSON
             var data = JSON.stringify({"email": email, "password": password});
 
-            xhr.open("POST", "user/login.php", true);
+            xhr.open("POST", "user/processLogin.php", true);
             xhr.setRequestHeader("Content-Type", "application/json");
             xhr.send(data);
 
