@@ -1,2 +1,5 @@
 # Ignore PhpStorm folders
 .idea/
+
+# Ignore mergetool .orig files
+*.orig

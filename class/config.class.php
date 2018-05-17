@@ -33,7 +33,7 @@ class Config {
      */
     private function __construct(){
         // config.php returns an array
-        self::$settings = include(dirname(__DIR__) . "utils/config.php");
+        self::$settings = include(dirname(__DIR__) . "/utils/config.php");
     }
 
     /**
@@ -55,7 +55,7 @@ class Config {
      * @return string|null Either the value for the key or null (setting is not
      * set).
      */
-    public function getSetting($setting): string{
+    public function getSetting($setting){
         if (isset(self::$settings[$setting])) {
             return self::$settings[$setting];
         }
