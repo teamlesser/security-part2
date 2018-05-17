@@ -106,8 +106,11 @@ function processLogin(){
         var response = JSON.parse(this.responseText);
 
         byId("return-message").innerHTML = response.message;
-    }
 
+        if (response.status === "success"){
+            window.location.replace("/securitylab/user/main.php");
+        }
+    }
 }
 
 //Main is run once the page has finished loading.
