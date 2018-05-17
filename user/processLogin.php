@@ -59,6 +59,30 @@ function passwordVerifies($email, $password): bool{
     return password_verify($password, $passwordHash);
 }
 
+/**
+ * Queries the username for the user with a certain e-mail.
+ * Pre-condition is that the user's e-mail has been verified.
+ * @param $email string The user's e-mail.
+ * @return string The username of the user.
+ */
+function getUsernameForEmail($email): string{
+    // Query for the username with the e-mail
+    $query = "SELECT username FROM securitylab.users WHERE email = $1;";
+    $param = array($email);
+
+    $db = Database::getInstance();
+    $result = $db->doParamQuery($query, $param);
+    $username = pg_fetch_result($result, 0, 0);
+    pg_free_result($result);
+
+    if ($username == null){
+        return "";
+    }
+
+    return $username;
+}
+
+
 // Checks that request method is POST
 if($_SERVER["REQUEST_METHOD"] == "POST"){
 
@@ -86,9 +110,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
                 // Create and give the user a JWT (token) as a session var
                 $token = array();
-                $token["email"] = $email;
+                $token["username"] = getUsernameForEmail($email);
                 setcookie("logged_in", JWT::encode($token,
-                    base64_decode(Config::getInstance()->getSetting("JWTSecretKey"))),
+                    Config::getInstance()->getSetting("JWTSecretKey")),
                     0, "/", "", false, true);
 
                 // Set user messages
