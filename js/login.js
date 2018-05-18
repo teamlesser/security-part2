@@ -66,10 +66,8 @@ function doLogin() {
             // EventListener for server state change
             xhr.addEventListener('readystatechange', processLogin, false);
 
-            /*
             email = encodeURIComponent(email);
             password = encodeURIComponent(password);
-*/
 
             // Message is composed and sent as JSON
             var data = JSON.stringify({"email": email, "password": password});

@@ -87,9 +87,11 @@ if(!isset($_COOKIE["logged_in"])){
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Main site</title>
-</head>
+        <script src="../js/main.js"></script>
+    </head>
 
 <body>
+
 <header>
 
 </header>
