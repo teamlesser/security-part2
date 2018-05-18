@@ -63,6 +63,7 @@ $title = "Security Lab - Group Four | Home page";
             </ul>
             <p>As a <b>hacker</b>, your task is to compromise this site in whatever way you can. Good luck with that!
             </p>
+        </div>
     </section>
 </main>
 
