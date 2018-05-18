@@ -68,6 +68,29 @@ html {
 }
 
 
+#main-section{
+    text-align:center;
+}
+
+footer{
+    position:fixed;
+    left: 0;
+    bottom: 20px;
+    width: 100%;
+    text-align:center;
+}
+
+footer a,p{
+    text-decoration: none;
+    font-weight: bold;
+    color:black;
+}
+
+footer a:visited{
+    color:black;
+}
+
+
 
 /*--------- REGISTRATION ------------*/
 

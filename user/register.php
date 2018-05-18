@@ -16,7 +16,7 @@ $title = "Security Lab - Group Four";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DT167G - <?php echo $title ?></title>
-    <link rel="stylesheet" href="css/style.css"/>
+    <link rel="stylesheet" href="../css/style.css"/>
 </head>
 <body>
 
@@ -28,7 +28,6 @@ $title = "Security Lab - Group Four";
     <div id="register-div">
         <h1>Register</h1>
         <form id="loginForm">
-
              <input type="text" placeholder="Username" id="username-field" name="username">
              <input type="password" placeholder="Password" id="password-field" name="password">
              <input type="password" placeholder="Re-type password" id="password-again-field" name="password_again">
@@ -36,21 +35,13 @@ $title = "Security Lab - Group Four";
              <button type="button" id="register-button" name="registerButton">Register</button>
         </form>
 
-        <div id="return-message"></div>
-        <a href="index.php">Go back</a>
+        <div id="return-message"></div><br>
+        <a href="../index.php">Go back</a>
     </div>
-
-<<<<<<< HEAD:user/register.php
-    <div id="return-message"></div>
-    <a href="../index.php">Go back</a>
-=======
-
->>>>>>> Added style.css to css folder. Changed functionality in register.php so that it passes the style template:register.php
-
 </main>
 
 <footer>
-
+    <p><a href="mailto:dawe1103@student.miun.se">Daniel</a> | <a href="mailto:rovi1601@student.miun.se">Robin</a> | <a href="mailto:lobe1602@student.miun.se">Bernard</a> | <a href="mailto:heho1602@student.miun.se">Heidi</a> | <a href="mailto:anli1606@student.miun.se">Andreas</a></p>
 </footer>
 
 </body>

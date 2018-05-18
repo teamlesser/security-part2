@@ -33,41 +33,20 @@ $title = "Security Lab - Group Four | Home page";
 </header>
 
 <main>
-    <aside id="verification-section">
-        <h1>Login</h1>
-        <div id="login-div">
-            <form id="loginForm">
-                <label for="email-field">Email:
-                    <input id="email-field" placeholder="E-mail">
-                </label>
-                <label for="password-field">Password:
-                    <input id="password-field" placeholder="Password">
-                </label>
-            </form>
-
-    <body>
-    <header>
-    </header>
-
-    <main>
-
-
-        <div id="login-div">
-            <h1>Login</h1>
-            <form id="loginForm">
-                <input id="email-field" placeholder="E-mail">
-                <input id="password-field" placeholder="Password">
-            </form>
-            <br>
-            <button id="login-button">Login</button>
-            <br>
-            <a href="user/register.php">New user?</a>
-            <br>
-            <a href="user/resetpassword.php">Forgot password?</a>
-        </div>
-
-        <div id="return-message"></div>
-    </aside>
+    <div id="login-div">
+        <h1>Security lab</h1>
+        <form id="loginForm">
+            <input id="email-field" placeholder="E-mail">
+            <input id="password-field" placeholder="Password">
+        </form>
+        <button id="login-button">Login</button>
+        <br>
+        <a href="user/register.php">New user?</a>
+        <br>
+        <a href="user/resetpassword.php">Forgot password?</a>
+    </div>
+    <div id="return-message"></div>
+<br><br><br>
     <section id="main-section">
         <div id="intro">
             <h3>Welcome the the Twitter clone of Andreas, Daniel, Heidi, Bernard &amp; Robin</h3>
@@ -87,13 +66,9 @@ $title = "Security Lab - Group Four | Home page";
     </section>
 </main>
 
-
-        <br>
-        <div id="return-message">aa</div>
-
-
 <footer>
-
+    <p><a href="mailto:dawe1103@student.miun.se">Daniel</a> | <a href="mailto:rovi1601@student.miun.se">Robin</a> | <a href="mailto:lobe1602@student.miun.se">Bernard</a> | <a href="mailto:heho1602@student.miun.se">Heidi</a> | <a href="mailto:anli1606@student.miun.se">Andreas</a></p>
 </footer>
 </body>
+
 </html>
