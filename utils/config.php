@@ -32,4 +32,6 @@ return array(
     "SMTPUsername" => "<your-gmail>@gmail.com",     // Username to Gmail
     "SMTPPassword" => "<your-password>"             // Password to Gmail
 
+    // JWT Secret Key (base 64 encoded)
+    "JWTSecretKey" => "VGZlTUs4RHhoTnQ1WHkxbVpvYk9EQTZqdnhQeDhVUkxxU3M3bWU5VU5wdTdqRk8zY3JrV3k1UkV4S3NScTlO"
 );

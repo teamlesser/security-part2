@@ -16,7 +16,7 @@
  */
 function my_autoloader($class) {
     $classfilename = strtolower($class);
-    include "class/" . $classfilename . ".class.php";
+    include dirname(__DIR__) . "/class/" . $classfilename . ".class.php";
 }
 spl_autoload_register('my_autoloader');
 

@@ -8,6 +8,8 @@
  * Date: 2018-05-08
  ******************************************************************************/
 
+include_once "../utils/util.php";
+
 /**
  * Class Config
  * A singleton class that serves the
