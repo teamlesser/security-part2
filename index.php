@@ -28,13 +28,11 @@ $title = "Security Lab - Group Four | Home page";
 
 <body>
 <header>
-
-
+    <h1>Security lab</h1>
 </header>
 
 <main>
     <div id="login-div">
-        <h1>Security lab</h1>
         <form id="loginForm">
             <input id="email-field" placeholder="E-mail" type="email">
             <input id="password-field" placeholder="Password" type="password">
