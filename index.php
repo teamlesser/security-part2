@@ -54,14 +54,14 @@ $title = "Security Lab - Group Four | Home page";
             <p>This is a small project for our course Software Security. The aim of this small project is to make a site
                 as secured as possible. By security, we mean a site that cannot be compromised easily. </p>
             <h4>Things you can do</h4>
-            <p>As a <b>user</b>, you will be able to</p>
+            <p>As a <span class="bold">user</span>, you will be able to</p>
             <ul>
                 <li><a href="user/register.php">Register</a> a new account</li>
                 <li><a href="user/login.php">Login </a> to an existing account</li>
                 <li>Post a message</li>
                 <li>Up/Down-vote message(s)</li>
             </ul>
-            <p>As a <b>hacker</b>, your task is to compromise this site in whatever way you can. Good luck with that!
+            <p>As a <span class="bold">hacker</span>, your task is to compromise this site in whatever way you can. Good luck with that!
             </p>
         </div>
     </section>

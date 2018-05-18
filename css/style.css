@@ -91,6 +91,20 @@ footer a:visited{
     color:black;
 }
 
+/*-- CSS for checking deprecated HTML tags (these should be replaced with CSS) --*/
+/*-- Source: https://cssnewbie.com/deprecated-element-highlighting/#.Wv7iOCBx2Uk -- */
+font, center, s, u, b, i {
+    color: #000;
+    font-weight: bold;
+    background-color: #f99;
+    border: 3px solid #c00;
+}
+
+/*-- Text styles, use with ex. <span class="bold"></span> --*/
+.bold {
+    font-weight: bolder;
+}
+
 /*--------- REGISTRATION ------------*/
 
 #loginForm input{
