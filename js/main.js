@@ -1,7 +1,7 @@
 /**
- * File: login.js
- * Desc: File for handling login through Ajax. Sends and receives data from login.php.
- * Date: 2018-05-11
+ * File: main.js
+ * Desc: File for handling page events on main.php.
+ * Date: 2018-05-18
  */
 
 /**
@@ -59,8 +59,8 @@ function doPostMessage() {
         var message = byId("textarea-message").value;
         var keywords = byId("input-keywords").value;
 
-        // Check that message doesn't contain < and >
-        var messageRegex = /[^<>]+/;
+        // Check that message doesn't contain other than legal characters
+        var messageRegex = /^[\w \-+.,!();:?]+$/;
 
         if (message.match(messageRegex)){
 
@@ -76,22 +76,20 @@ function doPostMessage() {
                 // EventListener for server state change
                 xhr.addEventListener('readystatechange', processPostMessage, false);
 
-                // Encode fields
-                message = encodeURIComponent(message);
-                keywords = encodeURIComponent(keywords);
-
                 // Message is composed and sent as JSON
                 var data = JSON.stringify({"message": message, "keywords": keywords});
 
-                xhr.open("POST", "user/processPostMessage.php", true);
+                xhr.open("POST", "../user/processPostMessage.php", true);
                 xhr.setRequestHeader("Content-Type", "application/json");
                 xhr.send(data);
-
             }
 
         } else {
             byId("return-message").innerHTML = "Message contains illegal characters.";
         }
+    }
+    else {
+        byId("return-message").innerHTML = "Empty message!";
     }
 }
 
@@ -115,6 +113,9 @@ function processPostMessage(){
         if (response.status === "success"){
             // TODO: Update page to show messages by date after posting, on success the processPostMessage will
             // send back an array with posts.
+        } else if (response.status === "authfail"){
+            // User was not authenticated, move them to index
+            window.location.replace("/securitylab/index.php");
         }
     }
 }
