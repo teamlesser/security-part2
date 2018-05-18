@@ -26,9 +26,9 @@ $title = "Security Lab - Group Four | Home page";
     <script src="js/login.js"></script>
 </head>
 
-
 <body>
 <header>
+
 
 </header>
 
@@ -46,7 +46,8 @@ $title = "Security Lab - Group Four | Home page";
         <a href="user/resetpassword.php">Forgot password?</a>
     </div>
     <div id="return-message"></div>
-<br><br><br>
+    <br><br><br>
+
     <section id="main-section">
         <div id="intro">
             <h3>Welcome the the Twitter clone of Andreas, Daniel, Heidi, Bernard &amp; Robin</h3>
@@ -62,13 +63,12 @@ $title = "Security Lab - Group Four | Home page";
             </ul>
             <p>As a <b>hacker</b>, your task is to compromise this site in whatever way you can. Good luck with that!
             </p>
-        </div>
     </section>
 </main>
+
 
 <footer>
     <p><a href="mailto:dawe1103@student.miun.se">Daniel</a> | <a href="mailto:rovi1601@student.miun.se">Robin</a> | <a href="mailto:lobe1602@student.miun.se">Bernard</a> | <a href="mailto:heho1602@student.miun.se">Heidi</a> | <a href="mailto:anli1606@student.miun.se">Andreas</a></p>
 </footer>
 </body>
-
 </html>
