@@ -65,7 +65,7 @@ $title = "Security Lab - Group Four | Home page";
                 <li>Post a message</li>
                 <li>Up/Down-vote message(s)</li>
             </ul>
-            <p>As a <span class="bold">hacker</span>, your task is to compromise this site in whatever way you can. Good luck with that!</p>
+            <p>As a <span class="bold">hacker</span>, your task is to compromise this site in whatever way you can.<br>Good luck with that!</p>
         </div>
     </section>
 </main>
