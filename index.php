@@ -26,6 +26,7 @@ $title = "Security Lab - Group Four | Home page";
     <script src="js/login.js"></script>
 </head>
 
+<<<<<<< HEAD
 <body>
 <header>
 
@@ -43,12 +44,29 @@ $title = "Security Lab - Group Four | Home page";
                     <input id="password-field" placeholder="Password">
                 </label>
             </form>
+=======
+    <body>
+    <header>
+    </header>
+
+    <main>
+
+
+        <div id="login-div">
+            <h1>Login</h1>
+            <form id="loginForm">
+                <input id="email-field" placeholder="E-mail">
+                <input id="password-field" placeholder="Password">
+            </form>
+            <br>
+>>>>>>> Added style.css to css folder. Changed functionality in register.php so that it passes the style template
             <button id="login-button">Login</button>
             <br>
             <a href="user/register.php">New user?</a>
             <br>
             <a href="user/resetpassword.php">Forgot password?</a>
         </div>
+<<<<<<< HEAD
         <div id="return-message"></div>
     </aside>
     <section id="main-section">
@@ -69,6 +87,11 @@ $title = "Security Lab - Group Four | Home page";
         </div>
     </section>
 </main>
+=======
+
+        <br>
+        <div id="return-message">aa</div>
+>>>>>>> Added style.css to css folder. Changed functionality in register.php so that it passes the style template
 
 <footer>
 

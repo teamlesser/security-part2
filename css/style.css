@@ -1,0 +1,81 @@
+/**
++ * File: style.css
+
++ * Date: 2018-05-15
+
++ * Desc: Style sheets for index.php, resetpassword.php and register.php
++ */
+
+html {
+    margin: auto;
+    font: 13px/1.2 Helvetica, Arial, sans-serif;
+    height:100%;
+    background: #EAEAEA;
+}
+
+
+
+#login-div, #register-div{
+    margin: 0 auto;
+    width:500px;
+    position:relative;
+    text-align: center;
+}
+
+#login-div h1{
+    text-align:center;
+}
+
+#login-button, #register-button{
+    background: darkorange;
+    display:block;
+    margin: 0 auto;
+    width: 146px;
+    border: none;
+    border-radius:4px;
+    color: white;
+    height: 32px;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+#login-button:hover{
+    opacity:0.85;
+}
+
+#login-div input{
+    display:block;
+    margin: 0 auto 2px;
+    padding:2px;
+    width: 140px;
+    border-radius: 4px;
+    border-style:solid;
+
+
+
+}
+
+#login-div a{
+    display: inline-block;
+
+}
+
+#return-message{
+    text-align:center;
+    color: #FF0000;
+    font-weight: bold;
+}
+
+
+
+/*--------- REGISTRATION ------------*/
+
+#loginForm input{
+    display:block;
+    margin: 0 auto 2px;
+    padding: 2px;
+    width: 140px;
+    border-radius: 4px;
+    border-style: solid;
+}
