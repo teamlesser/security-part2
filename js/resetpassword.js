@@ -14,7 +14,7 @@ function byId(id) {
  ******************************************************************************/
 function main() {
 
-	byId("resetPassword-button").addEventListener('click', doResetPassword, false);
+	byId("reset-password-button").addEventListener('click', doResetPassword, false);
     try {
         if (window.XMLHttpRequest) {
             // code for IE7+, Firefox, Chrome, Opera, Safari
@@ -39,15 +39,15 @@ function main() {
  ******************************************************************************/
 function doResetPassword() {
 
-    if (byId('email').value != "" && byId('newpass1').value != "" && byId('newpass2').value != '' && byId('resettoken').value != '') {
+    if (byId('email-field').value != "" && byId('newpass1-field').value != "" && byId('newpass2-field').value != '' && byId('resettoken-field').value != '') {
 		
 		// For later: encrypt the json data before sending it. Only possible if we can use additional libraries such as crypto.js
         var data = JSON.stringify(
 		{ 
-			"email": byId('email').value, 
-			"newpass1": byId('newpass1').value, 
-			"newpass2": byId('newpass2').value, 
-			"token": byId('resettoken').value 
+			"email": byId('email-field').value, 
+			"newpass1": byId('newpass1-field').value, 
+			"newpass2": byId('newpass2-field').value, 
+			"resettoken": byId('resettoken-field').value 
 		});
         xhr.addEventListener('readystatechange', processResetPassword, false);
         xhr.open('POST', 'user/resetpassword.php', true);
@@ -64,8 +64,8 @@ function processResetPassword() {
     if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
         
 		xhr.removeEventListener('readystatechange', processResetPassword, false);
-        var myResponse = JSON.parse(this.responseText);
-        byId("result").innerHTML = myResponse.message;	  
+        var myResponse = JSON.parse(this.response);
+        byId("return-message").innerHTML = myResponse.message;	  
 		
     } 
 }

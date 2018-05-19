@@ -1,13 +1,14 @@
 <?php
 /*******************************************************************************
- * File: reset-password.php
+ * File: resetpassword.php
  *
  * Desc: Tries to reset the password for the user in exchange of the correct resetToken
  *
  * Date: 2018-05-08
  ******************************************************************************/
- // Util (autoloader)
-include_once "../utils/util.php";
+require_once "../class/mailer.class.php";
+require_once "../class/config.class.php";
+require_once "../class/database.class.php";
  
 $response = array(
     "status" => false,
@@ -19,7 +20,7 @@ $response = array(
  * @param $email string The e-mail to search for.
  * @return bool If the email exists in the database.
  */
-function emailExists($email): bool {
+function emailExist($email): bool {
     
 	$query = "SELECT EXISTS (SELECT * FROM securitylab.users WHERE email = $1);";
     $param = array($email);
@@ -52,7 +53,7 @@ function resetTokenEmailMatch($email, $resetToken) : bool {
     $result = $db->doParamQuery($query, $param);
 
 	// Check if there was a match
-	if($result > 0)
+	if($result > 0) {
 		return true;
 	} else {
 		return false;
@@ -68,7 +69,7 @@ function resetTokenEmailMatch($email, $resetToken) : bool {
 function changePassword($email, $newPassword) : bool {
 	
 	$query = "UPDATE securitylab.users SET password = $1 WHERE email = $2";
-    $param = array($resetToken, $email);
+    $param = array($newPassword, $email);
 
     // Result only returns a boolean
     $db = Database::getInstance();
@@ -78,7 +79,7 @@ function changePassword($email, $newPassword) : bool {
     if ($result == null || $result == "f"){
         return false;
     } else {
-		deleteResetToken();
+		deleteResetToken($email);
         return true;
     }
 }
@@ -118,11 +119,11 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 		
 		$response["message"] = "The email you entered is not valid.";
 		
-	} else if (emailExist($email)) { // Check if the email exists
+	} else if (!emailExist($email)) { // Check if the email exists
 		
 		$response["message"] = "The email you entered does not exist.";
 		
-	} else if (resetTokenEmailMatch($email, $resetToken)) { // Check if the reset token matches the email
+	} else if (!resetTokenEmailMatch($email, $resetToken)) { // Check if the reset token matches the email
 		
 		$response["message"] = "The email and token you entered does not match.";
 	
