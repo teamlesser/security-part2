@@ -60,7 +60,7 @@ function processForgotPassword() {
     if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
         
 		xhr.removeEventListener('readystatechange', processForgotPassword, false);
-        var myResponse = JSON.parse(this.responseText);
+        var myResponse = JSON.parse(this.response);
         byId("result").innerHTML = myResponse.message;	  
 		
     } 

@@ -7,9 +7,9 @@
  *
  * Date: 2018-05-15
  ******************************************************************************/
-
- // Util (autoloader)
-include_once "../utils/util.php";
+require_once "../class/mailer.class.php";
+require_once "../class/config.class.php";
+require_once "../class/database.class.php";
  
 $response = array(
     "status" => false,
@@ -21,7 +21,7 @@ $response = array(
  * @param $email string The e-mail to search for.
  * @return bool If the email exists in the database.
  */
-function emailExists($email): bool {
+function emailExist($email): bool {
     
 	$query = "SELECT EXISTS (SELECT * FROM securitylab.users WHERE email = $1);";
     $param = array($email);
@@ -45,19 +45,19 @@ function emailExists($email): bool {
 */
 function resetTokenExist($email) : bool {
 	
-	$query = "SELECT COUNT(*) FROM securitylab.users WHERE email = $1 AND resettoken IS NOT NULL";
-	$param = array($email)
+	$query = "SELECT resettoken FROM securitylab.users WHERE email = $1 AND resettoken IS NOT NULL";
+	$param = array($email);
 
 	// Result only returns a boolean
 	$db = Database::getInstance();
 	$result = $db->doParamQuery($query, $param);
-
+	
 	// Check if an resetToken exists
-	if($result > 0)
-		return true;
-	} else {
-		return false;
-	}
+    if ($result == null || $result == "f"){
+        return false;
+    } else {
+        return true;
+    }
 }
 
 /**
@@ -77,7 +77,7 @@ function addResetToken($email, $resetToken) : bool {
 	$result = $db->doParamQuery($query, $param);
 
 	// "t" is true, "f" is false
-    if ($result == null || $result == "f"){
+    if ($result == null || $result == "f") {
         return false;
     } else {
         return true;
@@ -102,7 +102,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 		if(emailExist($email)) { // Check if email entered exists.
 				
 			if(resetTokenExist($email)) { // Check if user has any existing resettokens
-				
+			
 				$response["message"] = "An email with a reset link has already been sent to your email.";			
 			
 			} else { 
