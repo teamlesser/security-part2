@@ -14,7 +14,7 @@ function byId(id) {
  ******************************************************************************/
 function main() {
 
-    byId("forgotPassword-button").addEventListener('click', doForgotPassword, false);
+    byId("forgot-password-button").addEventListener('click', doForgotPassword, false);
     try {
         if (window.XMLHttpRequest) {
             // code for IE7+, Firefox, Chrome, Opera, Safari
@@ -41,7 +41,7 @@ function doForgotPassword() {
 	
 	if (byId('email').value != ""){
         
-        var data = JSON.stringify({"email": byId('email').value});
+        var data = JSON.stringify({"email": byId('email-field').value});
         xhr.addEventListener('readystatechange', processForgotPassword, false);
         xhr.open('POST', 'user/forgotpassword.php', true);
         xhr.setRequestHeader("Content-type", "application/json");
@@ -61,7 +61,7 @@ function processForgotPassword() {
         
 		xhr.removeEventListener('readystatechange', processForgotPassword, false);
         var myResponse = JSON.parse(this.response);
-        byId("result").innerHTML = myResponse.message;	  
+        byId("result-message").innerHTML = myResponse.message;	  
 		
     } 
 }

@@ -1,5 +1,16 @@
+<?php
+/**
+ * File: forgotpassword.php
+ * Date: 2018-05-19
+ * Desc: Page where a new user can request an email for an forgotten password
+ */
+
+/*******************************************************************************
+ * HTML section starts here
+ ******************************************************************************/
+?>
 <!DOCTYPE html>
-<html lang="en-EN">
+<html lang="sv-SE">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,16 +19,26 @@
 </head>
 <body>
 
-    <div id="forgotPassword">
+<header>
+</header>
+
+<main>
+    <div>
         <h2>Forgot Password</h2>
         <form id="forgottenPasswordForm">
-            <label for="email">Email:</label><br/>
-            <input type="email" placeholder="Enter your email..." name="email" id="email" required><br/>
-            <button type="button" id="forgotPassword-button">Forgot Password</button>
+            <label for="email-field">Email:</label><br/>
+            <input type="email" placeholder="Enter your email..." name="email" id="email-field" required><br/>
+            <button type="button" id="forgot-password-button">Forgot Password</button>
         </form>
-    </div>
-	
-	<p id="result"></p>
+	</div>
+
+    <div id="return-message"></div>
+    <a href="index.php">Go back</a>
+
+</main>
+
+<footer>
+</footer>
 
 </body>
 </html>
