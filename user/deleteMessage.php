@@ -31,9 +31,11 @@ function messageExistsAndIsOwnedByUser($username, $postId):bool {
     // Result only returns a boolean
     $db = Database::getInstance();
     $result = $db->doParamQuery($query, $param);
+    $bool = pg_fetch_result($result, 0, 0);
+    pg_free_result($result);
 
     // "t" is true, "f" is false
-    if ($result == null || $result == "f"){
+    if ($bool == null || $bool == "f"){
         return false;
     } else {
         return true;
