@@ -35,6 +35,32 @@ function usernameExists($username): bool{
 }
 
 /**
+ * Gets all messages from database.
+ * @return Message[] Array of Message-objects.
+ */
+function getAllMessagesFromDatabase(){
+
+    // Message[]
+    $messages = [];
+
+    $query = "SELECT message.id, users.username, message.message, message.date FROM securitylab.message
+          INNER JOIN securitylab.users ON users.id = message.user_id
+          ORDER BY date DESC;";
+
+    // Gets all posts and usernames for them
+    $db = Database::getInstance();
+    $result = $db->doSimpleQuery($query);
+
+    while($row = pg_fetch_row($result)){
+        $messages[] = new Message($row[0], $row[1], $row[2], $row[3]);
+    }
+
+    pg_free_result($result);
+
+    return $messages;
+}
+
+/**
  * Returns user to index.php and exits.
  */
 function returnToIndex(){
@@ -46,8 +72,11 @@ function returnToIndex(){
  * Overwrites cookie contents and expires it.
  */
 function destroyCookie(){
-
+    //TODO: Has to be implemented
 }
+
+// Will contain Message-objects if user is valid
+$messages = [];
 
 // Checks that user login cookie is set and valid before allowing on this page
 if(!isset($_COOKIE["logged_in"])){
@@ -76,6 +105,8 @@ if(!isset($_COOKIE["logged_in"])){
     if (!($decodedJWT != null && usernameExists($decodedJWT->username))){
         returnToIndex();
     }
+
+    $messages = getAllMessagesFromDatabase();
 }
 ?>
 
@@ -88,6 +119,7 @@ if(!isset($_COOKIE["logged_in"])){
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Main site</title>
         <script src="../js/main.js"></script>
+        <link rel="stylesheet" href="../css/style.css"/>
     </head>
 
 <body>
@@ -129,6 +161,23 @@ if(!isset($_COOKIE["logged_in"])){
     <button id="button-search-by-keyword">Search</button>
 
     <br>
+
+    <div id="messages">
+
+        <?php foreach ($messages as $message):?>
+            <div class="message">
+                <p><?php echo $message->getMessage() ?></p>
+                <div class="message-info">
+                    <p><span class="bold">By:</span> <?php echo $message->getUsername() ?></p>
+                    <?php if (!empty($message->getKeywords())): ?>
+                        <p class="keyword"><span class="bold">Keywords:</span> <?php foreach($message->getKeywords() as $keyword) {echo $keyword . " ";} ?></p>
+                    <?php endif ?>
+                    <p><span class="bold">Date:</span> <?php echo $message->getDate() ?></p>
+                </div>
+            </div>
+        <?php endforeach; ?>
+
+    </div>
 
     <!-- A general test on the order of the elements in a message. Needs to be styled in CSS. -->
     <!-- We also need to somehow generate messages in this format, probably with a for-loop in JS. -->

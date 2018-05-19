@@ -73,7 +73,7 @@ footer{
     width: 100%;
 }
 
-footer a,p{
+footer a, footer p{
     text-decoration: none;
     font-weight: bold;
     color:black;
@@ -95,6 +95,29 @@ font, center, s, u, b, i {
 /*-- Text styles, use with ex. <span class="bold"></span> --*/
 .bold {
     font-weight: bolder;
+}
+
+#messages {
+    font-weight: unset;
+    text-align: left;
+    margin: 0 auto;
+    width: 500px;
+}
+
+.message{
+     border: 1px solid darkgray;
+     padding: 20px;
+     margin: 10px 0;
+     background-color: white;
+ }
+
+.message-info{
+    margin: 15px 0 0 0;
+}
+
+.message p{
+    margin: 0;
+    padding: 0;
 }
 
 /*--------- REGISTRATION ------------*/
