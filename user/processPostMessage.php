@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * File: processPostMessage.php
+ * Date: 2018-05-19
+ * Desc: Processes a message being posted.
+ */
+
 // Util (autoloader)
 include_once "../utils/util.php";
 
@@ -99,14 +105,6 @@ function postKeyword($postId, $keyword):void{
     $param = array($postId, $keyword);
     $db = Database::getInstance();
     $db->doParamQuery($query, $param);
-}
-
-/**
- * Returns user to index.php and exits.
- */
-function returnToIndex(){
-    header('Location: ../index.php');
-    exit();
 }
 
 // Checks that request method is POST and that user is logged in //

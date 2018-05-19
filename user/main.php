@@ -7,32 +7,10 @@
  * sorting messages by popularity and date.
  */
 
+session_start();
+
 require_once "../utils/util.php";
 require_once "../vendor/jwt_helper.php";
-
-// TODO: Move this function from this file and processLogin.php to DatabaseManager and use
-// TODO: it through a DatabaseManager instance.
-
-/**
- * Checks if a username exists in the database and returns a bool.
- * @param $email string The e-mail to search for.
- * @return bool If the email exists in the database.
- */
-function usernameExists($username): bool{
-    $query = "SELECT EXISTS (SELECT * FROM securitylab.users WHERE username = $1);";
-    $param = array($username);
-
-    // Result only returns a boolean
-    $db = Database::getInstance();
-    $result = $db->doParamQuery($query, $param);
-
-    // "t" is true, "f" is false
-    if ($result == null || $result == "f"){
-        return false;
-    } else {
-        return true;
-    }
-}
 
 /**
  * Gets all messages from database.
@@ -60,23 +38,17 @@ function getAllMessagesFromDatabase(){
     return $messages;
 }
 
-/**
- * Returns user to index.php and exits.
- */
-function returnToIndex(){
-    header('Location: ../index.php');
-    exit();
-}
-
-/**
- * Overwrites cookie contents and expires it.
- */
-function destroyCookie(){
-    //TODO: Has to be implemented
-}
-
 // Will contain Message-objects if user is valid
 $messages = [];
+
+// Contains user data if valid.
+$decodedJWT = "";
+
+// User username if JWT is valid.
+$username = "";
+
+// Clears postid for session (one that the user thought about deleting)
+unset($_SESSION["postid"]);
 
 // Checks that user login cookie is set and valid before allowing on this page
 if(!isset($_COOKIE["logged_in"])){
@@ -85,10 +57,10 @@ if(!isset($_COOKIE["logged_in"])){
 
 } else {
     $jwt = $_COOKIE["logged_in"];
-    $decodedJWT;
 
     try{
         $decodedJWT = JWT::decode($jwt, Config::getInstance()->getSetting("JWTSecretKey"));
+        $username = $decodedJWT->username;
     }
 
     // UnexpectedValueException occurs if signature is wrong.
@@ -167,12 +139,25 @@ if(!isset($_COOKIE["logged_in"])){
         <?php foreach ($messages as $message):?>
             <div class="message">
                 <p><?php echo $message->getMessage() ?></p>
+
                 <div class="message-info">
+
                     <p><span class="bold">By:</span> <?php echo $message->getUsername() ?></p>
+
                     <?php if (!empty($message->getKeywords())): ?>
                         <p class="keyword"><span class="bold">Keywords:</span> <?php foreach($message->getKeywords() as $keyword) {echo $keyword . " ";} ?></p>
                     <?php endif ?>
+
                     <p><span class="bold">Date:</span> <?php echo $message->getDate() ?></p>
+
+                    <?php if ($username === $message->getUsername()): ?>
+
+                        <form action="deleteMessage.php" method="post">
+                            <button type="submit" value="<?php echo $message->getMessageId(); ?>"
+                                    name="delete">Delete</button>
+                        </form>
+
+                    <?php endif; ?>
                 </div>
             </div>
         <?php endforeach; ?>
