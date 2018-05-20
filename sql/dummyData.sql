@@ -19,10 +19,10 @@
 */
 -- blongho, m1dj:Angowins@, blongho02@gmail.com, verified
 INSERT INTO securitylab.users (username, password, email, verified)
-	VALUES ('blongho', '$2y$10$RWpL7ALUckG0f6xC1pApEOqRm5UmUt4XLReXidx0s9yk1GpDjjmzq',
+	VALUES ('blongho', '$2y$10$pL08Muz.3J3lFLBkiikp4OBTkcHIxLqtfuelKs3hQMajB12Cg2DIK',
 	'blongho02@gmail.com', true);
 
--- xavijeff, w06!mvR0_, xavilo500@gmail.com, unverified
+-- xavijeff, w06!mvR0_, xavilo300@gmail.com, unverified
 INSERT INTO securitylab.users (username, password, email, verified)
 	VALUES ('xavijeff', '$2y$10$tZuiYSbt9yqRP3wK53cuu.v3OuuXtRk0qSMmS6R43EGYySPO/VnVS',
 	'xavilo300@gmail.com', false);

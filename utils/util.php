@@ -15,9 +15,11 @@
  *
  * @param $class string Name of the class to be loaded.
  */
-function my_autoloader($class){
-	$classfilename = strtolower($class);
-	include "class/" . $classfilename . ".class.php";
+
+function my_autoloader($class) {
+    $classfilename = strtolower($class);
+    include dirname(__DIR__) . "/class/" . $classfilename . ".class.php";
+
 }
 
 spl_autoload_register('my_autoloader');

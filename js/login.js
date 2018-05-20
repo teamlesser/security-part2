@@ -47,7 +47,7 @@ function main(){
 }
 
 /**
- * Sends a POST to login.php that will attempt to login an user.
+ * Sends a POST to processLogin.php that will attempt to login an user.
  * Gets values from email and password fields and passes it on to server.
  */
 function doLogin() {
@@ -66,12 +66,10 @@ function doLogin() {
             // EventListener for server state change
             xhr.addEventListener('readystatechange', processLogin, false);
 
-            email = encodeURIComponent(email);
-            password = encodeURIComponent(password);
             // Message is composed and sent as JSON
             var data = JSON.stringify({"email": email, "password": password});
 
-            xhr.open("POST", "user/login.php", true);
+            xhr.open("POST", "user/processLogin.php", true);
             xhr.setRequestHeader("Content-Type", "application/json");
             xhr.send(data);
 
@@ -95,14 +93,19 @@ function doLogin() {
 function processLogin(){
 
     if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200){
+
         // Removes the EventListener since the xhr-object is reused
         xhr.removeEventListener("readystatechange", processLogin, false);
 
         // Handles response message
         var response = JSON.parse(this.responseText);
-        byId("return-message").innerHTML = response.message;
-    }
 
+        byId("return-message").innerHTML = response.message;
+
+        if (response.status === "success"){
+            window.location.replace("/securitylab/user/main.php");
+        }
+    }
 }
 
 //Main is run once the page has finished loading.
