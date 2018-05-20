@@ -145,7 +145,9 @@ class DbManager{
 	 */
 	public static function getUserByAttribute(string $attribute): array{
 		$container = self::getAllUsers();
+
 		$detailsFromAttribute = [];
+
 		if (!empty($container)){
 			foreach ($container as $array){
 				if (in_array($attribute, $array, true)){
@@ -214,4 +216,50 @@ class DbManager{
 		freeResource($results);
 	}
 
+
+	/**
+	 * Get all the keywords for a particular post
+	 *
+	 * @param int $msgId The id of the message
+	 *
+	 * @return array array containing the keywords
+	 */
+	public static function getPostKeyword(int $msgId){
+		// Array of strings
+		$keywords = [];
+
+		$query = "SELECT keyword.keyword FROM securitylab.keyword WHERE message_id = $1;";
+		$param = array($msgId);
+
+		$result = Database::getInstance()->doParamQuery($query, $param);
+
+		if ($result && pg_affected_rows($result) > 0){
+
+			while ($row = pg_fetch_row($result)){
+				$keywords[] = $row[0];
+			}
+
+			freeResource($result);
+		}
+
+		return $keywords;
+	}
+
+	/**
+	 * Get all messages in the database
+	 *
+	 * @return array an array with all the messages and their attributes from the database
+	 */
+	public static function getAllMessages(){
+		$query = "SELECT * FROM securitylab.message;";
+		$results = Database::getInstance()->doSimpleQuery($query);
+
+		$messages = [];
+		if (!is_null($results) && pg_affected_rows($results) > 0){
+			$messages = pg_fetch_all($results);
+		}
+		freeResource($results);
+
+		return $messages;
+	}
 }
