@@ -16,9 +16,9 @@
  * @param $class string Name of the class to be loaded.
  */
 
-function my_autoloader($class) {
-    $classfilename = strtolower($class);
-    include dirname(__DIR__) . "/class/" . $classfilename . ".class.php";
+function my_autoloader($class){
+	$classfilename = strtolower($class);
+	include dirname(__DIR__) . "/class/" . $classfilename . ".class.php";
 
 }
 
@@ -34,6 +34,11 @@ spl_autoload_register('my_autoloader');
  */
 function escapeString(string $string): string{
 	return pg_escape_literal($string);
+}
+
+
+function freeResource($resource){
+	pg_free_result($resource);
 }
 
 // Test functions
@@ -89,3 +94,5 @@ function displayNestedArray($arrayOfArrays){
 function newLine(){
 	echo "<br>";
 }
+
+

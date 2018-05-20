@@ -7,6 +7,27 @@ require_once("utils/util.php");
  * Date: 5/18/2018
  * Time: 1:49 PM
  */
+
+// Get a user by an attribute
+$user = DbManager::getUserByAttribute("marvis2000@yahoo.com"); // get by email
+$user2 = DbManager::getUserByAttribute("blongho"); // get user by username
+$user3 = DbManager::getUserByAttribute(2); // get user by id
+$user4
+	= DbManager::getUserByAttribute("$2y$10$pL08Muz.3J3lFLBkiikp4OBTkcHIxLqtfuelKs3hQMajB12Cg2DIK");
+echo "By email<br>";
+displayArray($user);
+newLine();
+
+echo "By username <br>";
+displayArray($user2);
+
+echo "By id <br>";
+displayArray($user3);
+
+echo "By password <br>";
+displayArray($user4); // fails! php interprets the password as a variable after the second $
+
+
 echo DbManager::addUser("blongho", "Another user", "blongho@gmail.com");
 // fails, blongho already in database
 newLine();

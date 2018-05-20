@@ -49,7 +49,10 @@ class DbManager{
 
 				$results = Database::getInstance()->doParamQuery($query, $params);
 
+
 				if ($results && pg_affected_rows($results) > 0){ // table row has been altered
+					freeResource($results);
+
 					return "Registration successful";
 
 				}else{ // no table row altered
@@ -95,13 +98,14 @@ class DbManager{
 	 * @return array All the users in the database and their details
 	 */
 	public static function getAllUsers(): array{
-		$query   = "SELECT * FROM securitylab.users;";
+		$query = "SELECT * FROM securitylab.users;";
 		$results = Database::getInstance()->doSimpleQuery($query);
 
 		$users = [];
 		if (!is_null($results) && pg_affected_rows($results) > 0){
 			$users = pg_fetch_all($results);
 		}
+		freeResource($results);
 
 		return $users;
 	}
@@ -115,7 +119,7 @@ class DbManager{
 	 */
 	public static function getUser(string $username): array{
 		if (!empty($username)){
-			$query  = "SELECT * FROM securitylab.users u WHERE u.username = $1";
+			$query = "SELECT * FROM securitylab.users u WHERE u.username = $1";
 			$params = array($username);
 
 			$results = Database::getInstance()->doParamQuery($query, $params);
@@ -126,8 +130,88 @@ class DbManager{
 				$userDetails = pg_fetch_assoc($results);
 			}
 		}
+		freeResource($results);
 
 		return $userDetails;
+	}
+
+	/**
+	 * Get a user by an attribute from the securitylab.users table
+	 *
+	 * @param string $attribute username|email|password|id|status
+	 *
+	 * @return array returns an array with the user's details [id, username, password, email,
+	 * status]
+	 */
+	public static function getUserByAttribute(string $attribute): array{
+		$container = self::getAllUsers();
+		$detailsFromAttribute = [];
+		if (!empty($container)){
+			foreach ($container as $array){
+				if (in_array($attribute, $array, true)){
+					$detailsFromAttribute = $array;
+					break;
+				}
+			}
+		}
+
+		return $detailsFromAttribute;
+	}
+	// =================================================================
+	//          UPDATE MESSAGE TABLE
+	// =================================================================
+	/**
+	 * Posts a message to the database.
+	 *
+	 * @param $username string Username of the poster.
+	 * @param $message  string Message that the user posted.
+	 *
+	 * @return int|null If the message could be posted an int is returned.
+	 */
+	public static function postMessage(string $username, string $message){
+		$query = "INSERT INTO securitylab.message (user_id, message) " .
+		         "VALUES ((SELECT id FROM securitylab.users u WHERE u.username = $1),$2);";
+
+		$param = array($username, $message);
+
+		$db = Database::getInstance();
+		$result = $db->doParamQuery($query, $param);
+
+		if ($result && pg_affected_rows($result) > 0){
+			freeResource($result);
+
+			// Check the id of the most recent post for this user and return it
+			$query = "SELECT id FROM securitylab.message " .
+			         "WHERE user_id = (SELECT id FROM securitylab.users u WHERE u.username = $1) " .
+			         "GROUP BY id " .
+			         "ORDER BY max(date) DESC;";
+
+			$param = array($username);
+			$result = $db->doParamQuery($query, $param);
+
+			// Get the topmost entry and return value
+			$postId = pg_fetch_result($result, 0, 0);
+			freeResource($result);
+
+			return $postId;
+		}
+
+		return null;
+	}
+
+
+	// Post a keyword
+
+	/**
+	 * Posts a keyword to a specific post.
+	 *
+	 * @param $postId int Id of the post.
+	 */
+	public static function postKeyword($postId, $keyword): void{
+		$query = "INSERT INTO securitylab.keyword (message_id, keyword) VALUES ($1,$2);";
+		$param = array($postId, $keyword);
+		$results = Database::getInstance()->doParamQuery($query, $param);
+		freeResource($results);
 	}
 
 }
