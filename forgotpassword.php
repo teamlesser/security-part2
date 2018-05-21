@@ -25,9 +25,10 @@
 <main>
     <div>
         <h2>Forgot Password</h2>
+		<p>Enter your e-mail and we will send you a password recovery link.</p>
         <form id="forgottenPasswordForm">
             <label for="email-field">Email:</label><br/>
-            <input type="email" placeholder="Enter your email..." name="email" id="email-field" required><br/>
+            <input type="email" placeholder="Enter" name="email" id="email-field" required><br/>
             <button type="button" id="forgot-password-button">Forgot Password</button>
         </form>
 	</div>
