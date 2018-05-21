@@ -78,9 +78,6 @@ function processDelete(){
         // Handles response message
         var response = JSON.parse(this.responseText);
 
-        // TODO TEST: REMOVE
-        console.log(response);
-
         // Displays the message on page
         byId("return-message").innerHTML = response.message;
 

@@ -55,8 +55,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             } catch (DomainException $de) {
                 $response["message"] = "Deletion failed, domain.";
             }
-        } else {
-            $response["message"] = "Deletion failed4." . (isset($_POST["delete"]) ? "true" : "false");
         }
     }
 }
