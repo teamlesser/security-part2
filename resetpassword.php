@@ -14,7 +14,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forgot password</title>
+    <title>Reset password</title>
     <script src="js/resetpassword.js"></script> 
 </head>
 <body>
@@ -25,13 +25,14 @@
 <main>
     <div>
         <h2>Reset Password</h2>
+		<p>Enter your email and reset token aswell as your new password twice. Click the Reset password button to confirm password change.</p>
         <form id="resetPasswordForm">
             <label for="email-field">Email:</label><br/>
-            <input type="email" placeholder="Enter your email..." name="email" id="email-field" required><br/>
+            <input type="email" placeholder="Email" name="email" id="email-field" required><br/>
 			<label for="resettoken-field">Reset token:</label><br/>
-			<input type="text" placeholder="Enter reset token" name="resettoken" id="resettoken-field" required><br/>
+			<input type="text" placeholder="Reset token" name="resettoken" id="resettoken-field" required><br/>
 			<label for="newpass1-field">New password:</label><br/>
-            <input type="password" placeholder="Enter new password" name="newpass1" id="newpass1-field" required><br/>
+            <input type="password" placeholder="New password" name="newpass1" id="newpass1-field" required><br/>
 			<label for="newpass2-field">Confirm new password:</label><br/>
             <input type="password" placeholder="Confirm new password" name="newpass2" id="newpass2-field" required><br/>
             <button type="button" id="reset-password-button">Reset Password</button>
