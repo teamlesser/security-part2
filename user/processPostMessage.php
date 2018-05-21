@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * File: processPostMessage.php
+ * Date: 2018-05-19
+ * Desc: Processes a message being posted.
+ */
+
 // Util (autoloader)
 include_once("../utils/util.php");
 
@@ -11,18 +17,6 @@ $response = array(
 	"status"  => "error",
 	"message" => "error",
 );
-
-/**
- * Checks if a username exists in the database and returns a bool.
- *
- * @param $email string The e-mail to search for.
- *
- * @return bool If the email exists in the database.
- */
-function usernameExists($username): bool{
-	return !empty(DbManager::getUserByAttribute($username));
-}
-
 
 /**
  * Checks that all keywords in an array are shorter than 25 chars.
@@ -44,15 +38,6 @@ function keywordLengthCheck($keywords): bool{
 	}
 
 	return !$keywordError;
-}
-
-
-/**
- * Returns user to index.php and exits.
- */
-function returnToIndex(){
-	header('Location: ../index.php');
-	exit();
 }
 
 // Checks that request method is POST and that user is logged in //

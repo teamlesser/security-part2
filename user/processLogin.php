@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * File: processLogin.php
+ * Date: 2018-05-19
+ * Desc: Processes a login from an user.
+ */
+
 // Util (autoloader)
 include_once "../utils/util.php";
 

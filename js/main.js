@@ -60,7 +60,7 @@ function doPostMessage() {
         var keywords = byId("input-keywords").value;
 
         // Check that message doesn't contain other than legal characters
-        var messageRegex = /^[\w \-+.,!();:?]+$/;
+        var messageRegex = /^[\w \-+.,!()';:?]+$/;
 
         if (message.match(messageRegex)){
 
@@ -111,11 +111,17 @@ function processPostMessage(){
         byId("return-message").innerHTML = response.message;
 
         if (response.status === "success"){
-            window.location.replace("http://localhost/securitylab/user/main.php");
+            // TODO: Update page to show messages by date after posting,
+            // on success the processPostMessage should
             // send back an array with posts.
+
+            // Empties post fields
+            byId("textarea-message").value = "";
+            byId("input-keywords").value = "";
+
         } else if (response.status === "authfail"){
             // User was not authenticated, move them to index
-            window.location.replace("http://localhost/securitylab/test.php");
+            window.location.replace("/securitylab/index.php");
         }
     }
 }
