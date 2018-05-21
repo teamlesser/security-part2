@@ -24,6 +24,9 @@ class Message{
 	// string[] for keywords for the post
 	private $keywords;
 
+	// What the value for voting is
+	private $votes;
+
 	/**
 	 * Message constructor. Sets data members and gets keywords for post.
 	 *
@@ -43,17 +46,17 @@ class Message{
 		$this->date = $this->date->format("Y-m-d (H:i:s)");
 
 		// Asks for keywords for post
-		$this->keywords = $this->getKeywordsForPost();
+		$this->keywords = DbManager::getPostKeyword($this->messageId);
+		$this->votes = DbManager::getVotes($this->messageId);
 	}
 
-	/**
-	 * Gets the keywords for this post from the database.
-	 *
-	 * @return string[] Keywords for the post, if any.
-	 */
-	private function getKeywordsForPost(){
-		return DbManager::getPostKeyword($this->messageId);
-	}
+    /**
+     * Get votes for post.
+     * @return int The voting score for the post.
+     */
+	public function getVotes(){
+	    return $this->votes;
+    }
 
 	/**
 	 * @return int

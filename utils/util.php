@@ -121,3 +121,36 @@ function destroyCookie(){
 function usernameExists($username): bool{
     return !empty(DbManager::getUserByAttribute($username));
 }
+
+
+/**
+ * Gets username from JWT cookie.
+ * @return string The logged_in users username.
+ */
+
+function getJWTUsername(){
+    $jwt = $_COOKIE["logged_in"];
+    $username = "";
+
+    try{
+        $decodedJWT = JWT::decode($jwt, Config::getInstance()->getSetting("JWTSecretKey"));
+        $username = $decodedJWT->username;
+    }
+
+        // UnexpectedValueException occurs if signature is wrong.
+    catch (UnexpectedValueException $uve){
+        echo $uve->getMessage();
+        exit();
+    }
+
+    catch (DomainException $de){
+        echo $de->getMessage();
+        exit();
+    }
+
+    if (!($decodedJWT != null && ($decodedJWT->username))){
+        returnToIndex();
+    }
+
+    return $username;
+}

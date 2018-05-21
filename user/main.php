@@ -33,28 +33,7 @@ if (!isset($_COOKIE["logged_in"])){
 	returnToIndex();
 
 }else{
-	$jwt = $_COOKIE["logged_in"];
-
-	try{
-		$decodedJWT = JWT::decode($jwt, Config::getInstance()->getSetting("JWTSecretKey"));
-        $username = $decodedJWT->username;
-	}
-
-		// UnexpectedValueException occurs if signature is wrong.
-	catch (UnexpectedValueException $uve){
-		echo $uve->getMessage();
-		exit();
-	}
-
-	catch (DomainException $de){
-		echo $de->getMessage();
-		exit();
-	}
-
-	if (!($decodedJWT != null && ($decodedJWT->username))){
-		returnToIndex();
-	}
-
+	$username = getJWTUsername();
 	$messages = DbManager::getAllMessages();
 }
 ?>
@@ -81,7 +60,7 @@ if (!isset($_COOKIE["logged_in"])){
 
     <h1>Messages</h1>
 
-    <div id="div-logged-in-as">Logged in as <?php echo $decodedJWT->username ?></div>
+    <div id="div-logged-in-as">Logged in as <?php echo $username ?></div>
 
     <br>
 
@@ -117,50 +96,57 @@ if (!isset($_COOKIE["logged_in"])){
 
 		<?php foreach ($messages as $message): ?>
             <div class="message">
+                <div class="voting">
+                    <?php $thisUserVote = DbManager::userHasVoted($username, $message->getMessageId()) ?>
+
+                    <a href="doVote.php?vote=up&id=<?php echo $message->getMessageId(); ?>">
+
+                        <img class="upvote" src="
+                        <?php if ($thisUserVote == 1){echo '../img/upvote_selected.png';}
+                        else {echo '../img/upvote_unselected.png';} ?>" />
+
+                    </a>
+
+                    <p class="count"><?php echo $message->getVotes(); ?></p>
+
+                    <a href="doVote.php?vote=down&id=<?php echo $message->getMessageId(); ?>">
+
+                        <img class="downvote" src="<?php if ($thisUserVote == -1){echo '../img/downvote_selected.png';}
+                        else {echo '../img/downvote_unselected.png';} ?>" />
+
+                    </a>
+
+                </div>
+
+                <div class="message-contents">
                 <p><?php echo $message->getMessage() ?></p>
 
-                <div class="message-info">
+                    <div class="message-info">
 
-                    <p><span class="bold">By:</span> <?php echo $message->getUsername() ?></p>
+                        <p><span class="bold">By:</span> <?php echo $message->getUsername() ?></p>
 
-					<?php if (!empty($message->getKeywords())): ?>
-                        <p class="keyword"><span class="bold">Keywords:</span> <?php
-							foreach ($message->getKeywords() as $keyword){
-								echo $keyword . " ";
-							} ?></p>
-					<?php endif ?>
+                        <?php if (!empty($message->getKeywords())): ?>
+                            <p class="keyword"><span class="bold">Keywords:</span> <?php
+                                foreach ($message->getKeywords() as $keyword){
+                                    echo $keyword . " ";
+                                } ?></p>
+                        <?php endif ?>
 
-                    <p><span class="bold">Date:</span> <?php echo $message->getDate() ?></p>
+                        <p><span class="bold">Date:</span> <?php echo $message->getDate() ?></p>
 
-                    <?php if ($username === $message->getUsername()): ?>
+                        <?php if ($username === $message->getUsername()): ?>
 
-                        <form action="deleteMessage.php" method="post">
-                            <button type="submit" value="<?php echo $message->getMessageId(); ?>"
-                                    name="delete">Delete</button>
-                        </form>
+                            <form action="deleteMessage.php" method="post">
+                                <button type="submit" value="<?php echo $message->getMessageId(); ?>"
+                                        name="delete">Delete</button>
+                            </form>
 
-                    <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
 		<?php endforeach; ?>
 
-    </div>
-
-    <!-- A general test on the order of the elements in a message. Needs to be styled in CSS. -->
-    <!-- We also need to somehow generate messages in this format, probably with a for-loop in JS. -->
-    <!-- One question is how we will safely convey which message should be upvoted, could the user -->
-    <!-- Modify the page source and set for example the id of one post to another? -->
-    <h4>Dummy message</h4>
-
-    <div class="message">
-        <input type="image" src="../img/upvote_unselected.png" alt="Submit" width="48" height="48">
-        <p>0</p>
-        <input type="image" src="../img/downvote_unselected.png" alt="Submit" width="48"
-               height="48">
-        <p>Hello world!</p>
-        <p>By: Username</p>
-        <p>Keywords: keyword wordkey</p>
-        <p>Date: yyyy-mm-dd</p>
     </div>
 
 </main>

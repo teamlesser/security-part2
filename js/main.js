@@ -24,7 +24,7 @@ function byId(id) {
  */
 function main(){
 
-    //Adds EventListeners to buttons.
+    //Adds EventListeners to post message button.
     byId("button-post-message").addEventListener('click', doPostMessage, false);
 
     // Creates matching XMLHttpRequest-object
