@@ -1,7 +1,6 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: andre
+ * File: processRegister.php
  * Date: 2018-05-18
  * Time: 12:41
  */
