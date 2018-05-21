@@ -89,4 +89,11 @@ class Message{
 	public function getUsername(): string{
 		return $this->username;
 	}
+
+	public function displayMessage(){
+		echo "Id = $this->messageId<br>User = $this->username<br>Message = $this->message<br>".
+		     "Date = $this->date<br>Keywords: ";
+		displayArray($this->getKeywordsForPost());
+	}
+
 }

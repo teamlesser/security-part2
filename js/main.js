@@ -111,11 +111,11 @@ function processPostMessage(){
         byId("return-message").innerHTML = response.message;
 
         if (response.status === "success"){
-            // TODO: Update page to show messages by date after posting, on success the processPostMessage will
+            window.location.replace("http://localhost/securitylab/user/main.php");
             // send back an array with posts.
         } else if (response.status === "authfail"){
             // User was not authenticated, move them to index
-            window.location.replace("/securitylab/index.php");
+            window.location.replace("http://localhost/securitylab/test.php");
         }
     }
 }

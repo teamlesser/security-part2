@@ -8,24 +8,22 @@ require_once("utils/util.php");
  * Time: 1:49 PM
  */
 
+
 // see all users
 echo "<b>All users </b><br>";
 $users = DbManager::getAllUsers();
 
-foreach ($users as $key => $value){
-	foreach ($value as $k => $v){
-		echo "$k => $v <br>";
-	}
+foreach ($users as $user){
+
+	$user->displayUser();
 	newLine();
 }
 
 // see all messages
 echo "<b>All messages </b><br>";
 $messages = DbManager::getAllMessages();
-foreach ($messages as $key => $value){
-	foreach ($value as $k => $v){
-		echo "$k => $v <br>";
-	}
+foreach ($messages as $message){
+	$message->displayMessage();
 	newLine();
 }
 

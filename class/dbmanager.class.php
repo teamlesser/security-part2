@@ -93,6 +93,19 @@ class DbManager{
 	}
 
 	/**
+	 * Determine that a username exits in the database
+	 *
+	 * @param string $username
+	 *
+	 * @return bool
+	 */
+	public static function userExists(string $attribute): bool{
+		$all = self::getAllUsers();
+
+		return !self::isUnique($attribute, $all);
+	}
+
+	/**
 	 * Fetch all users in the database
 	 *
 	 * @return array All the users in the database and their details
@@ -103,7 +116,9 @@ class DbManager{
 
 		$users = [];
 		if (!is_null($results) && pg_affected_rows($results) > 0){
-			$users = pg_fetch_all($results);
+			while ($user = pg_fetch_row($results)){
+				$users [] = new User($user[0], $user[1], $user[2], $user[3], $user[4]);
+			}
 		}
 		freeResource($results);
 
@@ -144,8 +159,13 @@ class DbManager{
 	 * status]
 	 */
 	public static function getUserByAttribute(string $attribute): array{
-		$container = self::getAllUsers();
-
+		$query = "SELECT * FROM securitylab.users;";
+		$results = Database::getInstance()->doSimpleQuery($query);
+		$container = [];
+		if (!is_null($results) && pg_affected_rows($results) > 0){
+			$container = pg_fetch_all($results);
+		}
+		freeResource($results);
 		$detailsFromAttribute = [];
 
 		if (!empty($container)){
@@ -156,6 +176,7 @@ class DbManager{
 				}
 			}
 		}
+
 
 		return $detailsFromAttribute;
 	}
@@ -201,6 +222,55 @@ class DbManager{
 		return null;
 	}
 
+	/**
+	 * Get all messages in the database
+	 *
+	 * @return array an array with all the messages and their attributes from the database
+	 */
+	public static function getAllMessages(){
+
+		// Message[]
+		$messages = [];
+
+		$query
+			= "SELECT message.id, users.username, message.message, message.date FROM securitylab.message
+          INNER JOIN securitylab.users ON users.id = message.user_id
+          ORDER BY date DESC;";
+
+		// Gets all posts and usernames for them
+		$db = Database::getInstance();
+		$result = $db->doSimpleQuery($query);
+
+		while ($row = pg_fetch_row($result)){
+			$messages[] = new Message($row[0], $row[1], $row[2], $row[3]);
+		}
+
+		pg_free_result($result);
+
+		return $messages;
+	}
+
+	/**
+	 * Get a message by attribute
+	 *
+	 * @param $attribute
+	 *
+	 * @return array
+	 */
+	public static function getMessageByKeyword(string $attribute): array{
+		$messages = self::getAllMessages();
+		$message = [];
+		if (!empty($messages)){
+			foreach ($messages as $array){
+				if (in_array($attribute, $array, true)){
+					$message = $array;
+					break;
+				}
+			}
+		}
+
+		return $message;
+	}
 
 	// Post a keyword
 
@@ -245,21 +315,5 @@ class DbManager{
 		return $keywords;
 	}
 
-	/**
-	 * Get all messages in the database
-	 *
-	 * @return array an array with all the messages and their attributes from the database
-	 */
-	public static function getAllMessages(){
-		$query = "SELECT * FROM securitylab.message;";
-		$results = Database::getInstance()->doSimpleQuery($query);
 
-		$messages = [];
-		if (!is_null($results) && pg_affected_rows($results) > 0){
-			$messages = pg_fetch_all($results);
-		}
-		freeResource($results);
-
-		return $messages;
-	}
 }
