@@ -113,21 +113,11 @@ function destroyCookie(){
 
 /**
  * Checks if a username exists in the database and returns a bool.
+ *
  * @param $email string The e-mail to search for.
+ *
  * @return bool If the email exists in the database.
  */
 function usernameExists($username): bool{
-    $query = "SELECT EXISTS (SELECT * FROM securitylab.users WHERE username = $1);";
-    $param = array($username);
-
-    // Result only returns a boolean
-    $db = Database::getInstance();
-    $result = $db->doParamQuery($query, $param);
-
-    // "t" is true, "f" is false
-    if ($result == null || $result == "f"){
-        return false;
-    } else {
-        return true;
-    }
+    return !empty(DbManager::getUserByAttribute($username));
 }

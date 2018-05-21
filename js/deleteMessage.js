@@ -47,9 +47,6 @@ function main(){
     }
 }
 
-/**
- * Returns the user to main page.
- */
 function returnToMain(){
     window.location.replace("/securitylab/user/main.php");
 }
@@ -62,7 +59,7 @@ function doDelete() {
     xhr.addEventListener('readystatechange', processDelete, false);
 
     // Message is composed and sent as JSON
-    var data = JSON.stringify({"id":byId("button-yes").value});
+    var data = JSON.stringify({"deleteValue":byId("button-yes").value});
 
     xhr.open("POST", "../user/processDeleteMessage.php", true);
     xhr.setRequestHeader("Content-Type", "application/json");
@@ -81,8 +78,15 @@ function processDelete(){
         // Handles response message
         var response = JSON.parse(this.responseText);
 
+        // TODO TEST: REMOVE
+        console.log(response);
+
         // Displays the message on page
         byId("return-message").innerHTML = response.message;
+
+        if (response.status === "success"){
+            returnToMain();
+        }
     }
 }
 

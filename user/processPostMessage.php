@@ -19,18 +19,6 @@ $response = array(
 );
 
 /**
- * Checks if a username exists in the database and returns a bool.
- *
- * @param $email string The e-mail to search for.
- *
- * @return bool If the email exists in the database.
- */
-function usernameExists($username): bool{
-	return !empty(DbManager::getUserByAttribute($username));
-}
-
-
-/**
  * Checks that all keywords in an array are shorter than 25 chars.
  *
  * @param $keywords string[] The keywords.
@@ -50,8 +38,6 @@ function keywordLengthCheck($keywords): bool{
 	}
 
 	return !$keywordError;
-}
-
 }
 
 // Checks that request method is POST and that user is logged in //

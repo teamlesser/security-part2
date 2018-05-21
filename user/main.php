@@ -12,14 +12,8 @@ session_start();
 require_once "../utils/util.php";
 require_once "../vendor/jwt_helper.php";
 
- *
- *
-	return !empty(DbManager::getUserByAttribute($username));
-}
 
-	header('Location: ../index.php');
-	exit();
-	//TODO: Has to be implemented
+
 // Will contain Message-objects if user is valid
 $messages = [];
 
@@ -30,7 +24,8 @@ $decodedJWT = "";
 $username = "";
 
 // Clears postid for session (one that the user thought about deleting)
-unset($_SESSION["postid"]);
+unset($_SESSION["deleteAuthValue"]);
+setcookie('delete_auth', null, -1, '/securitylab/user/');
 
 // Checks that user login cookie is set and valid before allowing on this page
 if (!isset($_COOKIE["logged_in"])){

@@ -14,62 +14,6 @@ include_once "../utils/util.php";
 // JWT Helper
 require_once "../vendor/jwt_helper.php";
 
-/**
- * Checks that the message exists and is owned by the user.
- * @param $username string Username of the user.
- * @param $postId int Post id.
- * @return bool If the post is owned by the user and both exist.
- */
-function messageExistsAndIsOwnedByUser($username, $postId):bool {
-    $query = "SELECT EXISTS (
-        SELECT * FROM securitylab.users 
-        INNER JOIN securitylab.message ON message.user_id = users.id 
-        WHERE username = $1 AND message.id = $2);";
-
-    $param = array($username, $postId);
-
-    // Result only returns a boolean
-    $db = Database::getInstance();
-    $result = $db->doParamQuery($query, $param);
-    $bool = pg_fetch_result($result, 0, 0);
-    pg_free_result($result);
-
-    // "t" is true, "f" is false
-    if ($bool == null || $bool == "f"){
-        return false;
-    } else {
-        return true;
-    }
-}
-
-/**
- * Gets a message by id.
- * @param $postId int Id of the message.
- * @return Message|null A message object.
- */
-function getMessageById($postId) {
-
-    $query = "SELECT message.id, users.username, message.message, message.date FROM securitylab.message
-        INNER JOIN securitylab.users ON users.id = message.user_id
-        WHERE message.id = $1;";
-
-    $param = array($postId);
-
-    // Result only returns a boolean
-    $db = Database::getInstance();
-    $result = $db->doParamQuery($query, $param);
-
-    if ($result){
-        $msgData = pg_fetch_row($result, 0);
-        pg_free_result($result);
-        $message = new Message($msgData[0], $msgData[1], $msgData[2], $msgData[3]);
-        return $message;
-    }
-
-    return null;
-}
-
-
 // Check that user is logged in, otherwise kick them out to index
 if(!isset($_COOKIE["logged_in"])){
     returnToIndex();
@@ -82,19 +26,23 @@ $message = "";
 $username = "";
 
 // Checks that request method is POST
-if($_SERVER["REQUEST_METHOD"] == "POST"){
+if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])){
     $postId = htmlspecialchars($_POST["delete"]);
 
     // Check that post exists and that the current user owns it
     $decodedJWT = JWT::decode($_COOKIE["logged_in"], Config::getInstance()->getSetting("JWTSecretKey"));
     $username = $decodedJWT->username;
 
-    if (messageExistsAndIsOwnedByUser($username, $postId)){
+    if (DbManager::messageExistsAndIsOwnedByUser($username, $postId)){
         // Display "are you sure" message along with the post being deleted.
         $pageMessage = "Are you sure you want to delete the below message?";
         $canDelete = true;
-        $message = getMessageById($postId);
-        $_SESSION["postid"] = $postId;
+        $message = DbManager::getMessageById($postId);
+
+        $deleteArray = array("postId"=> $postId, "timeIssued" => date("Y-m-d h:i:s"));
+
+        $_SESSION["deleteAuthValue"] = JWT::encode($deleteArray, Config::getInstance()->getSetting("JWTSecretKey"));
+        setcookie("delete_auth", $_SESSION["deleteAuthValue"]);
     }
 }
 
@@ -139,7 +87,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                         </div>
                     </div>
                 </div>
-                <button id="button-yes">Yes</button><button id="button-no">No</button>
+                <button id="button-yes" value="<?php echo $_SESSION["deleteAuthValue"]?>">Yes</button><button id="button-no">No</button>
             <?php endif; ?>
 
             <div id="return-message"></div>
