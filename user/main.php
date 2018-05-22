@@ -12,8 +12,6 @@ session_start();
 require_once "../utils/util.php";
 require_once "../vendor/jwt_helper.php";
 
-
-
 // Will contain Message-objects if user is valid
 $messages = [];
 
@@ -36,6 +34,42 @@ if (!isset($_COOKIE["logged_in"])){
 	$username = getJWTUsername();
 	$messages = DbManager::getAllMessages();
 }
+
+// Counts vote, if one was posted
+if ($_SERVER["REQUEST_METHOD"] == "POST"){
+    if (isset($_POST["vote"])){
+
+        // Checks that JWT is valid
+        $jwtVote = JWT::decode($_POST["vote"], Config::getInstance()->getSetting("JWTSecretKey"));
+
+        if ($jwtVote->username != null && $jwtVote->time != null && $jwtVote->vote != null && $jwtVote->postid != null){
+
+            // Checks that the vote is made by the logged in user
+            if ($jwtVote->username === $username){
+
+                $timeIssued = strtotime($jwtVote->time);
+                $timeNow = strtotime(date("Y-m-d H:i:s"));
+
+                $timeDifference = $timeNow - $timeIssued;
+
+                // If time difference is less than 5 minutes, the vote is made.
+                if ($timeDifference < 300){
+
+                    $postNum = htmlspecialchars($jwtVote->postid);
+                    $voteInt = htmlspecialchars($jwtVote->vote);
+
+                    // Do the vote
+                    DbManager::doVote($username, $postNum, $voteInt);
+
+                    // Force reload of the page, otherwise the cached results will be shown.
+                    // Also prevents re-submitting of form if refreshing
+                    header("location: {$_SERVER['PHP_SELF']}");
+                }
+            }
+        }
+    }
+}
+
 ?>
 
 <!--**** HTML-SECTION STARTS HERE ****-->
@@ -94,27 +128,35 @@ if (!isset($_COOKIE["logged_in"])){
 
     <div id="messages">
 
+        <?php $pageLoadTime = date("Y-m-d H:i:s"); ?>
+
 		<?php foreach ($messages as $message): ?>
+
+            <?php $jwtVoteArray = array("username"=>$username, "postid"=>$message->getMessageId(),
+                "time"=> $pageLoadTime); ?>
+
+            <?php $thisUserVote = DbManager::userHasVoted($username, $message->getMessageId()) ?>
+
             <div class="message">
                 <div class="voting">
-                    <?php $thisUserVote = DbManager::userHasVoted($username, $message->getMessageId()) ?>
 
-                    <a href="doVote.php?vote=up&id=<?php echo $message->getMessageId(); ?>">
+                    <?php $jwtVoteArray["vote"] = 1 ?>
 
-                        <img class="upvote" src="
-                        <?php if ($thisUserVote == 1){echo '../img/upvote_selected.png';}
-                        else {echo '../img/upvote_unselected.png';} ?>" />
-
-                    </a>
+                    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+                        <button class="upvote<?php if($thisUserVote == 1){echo "d";}?>" type="submit" name="vote"
+                                value="<?php echo JWT::encode($jwtVoteArray, Config::getInstance()->getSetting("JWTSecretKey")) ?>" >
+                        </button>
+                    </form>
 
                     <p class="count"><?php echo $message->getVotes(); ?></p>
 
-                    <a href="doVote.php?vote=down&id=<?php echo $message->getMessageId(); ?>">
+                    <?php $jwtVoteArray["vote"] = -1 ?>
 
-                        <img class="downvote" src="<?php if ($thisUserVote == -1){echo '../img/downvote_selected.png';}
-                        else {echo '../img/downvote_unselected.png';} ?>" />
-
-                    </a>
+                    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+                        <button class="downvote<?php if($thisUserVote == -1){echo "d";}?>" type="submit" name="vote"
+                                value="<?php echo JWT::encode($jwtVoteArray, Config::getInstance()->getSetting("JWTSecretKey")) ?>">
+                        </button>
+                    </form>
 
                 </div>
 

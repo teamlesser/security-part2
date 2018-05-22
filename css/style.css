@@ -121,11 +121,6 @@ font, center, s, u, b, i {
     padding: 0;
 }
 
-.message img{
-    width: 50px;
-    height: 50px;
-}
-
 .message-contents{
     padding: 10px;
 }
@@ -142,12 +137,56 @@ font, center, s, u, b, i {
     font-size: larger;
 }
 
+.upvote{
+    background:url(../img/upvote_unselected.png) no-repeat;
+    background-size: 50px 50px;
+    width: 50px;
+    height: 50px;
+    border:none;
+}
+
+.upvoted{
+    background:url(../img/upvote_selected.png) no-repeat;
+    background-size: 50px 50px;
+    width: 50px;
+    height: 50px;
+    border:none;
+}
+
+.downvote{
+    background:url(../img/downvote_unselected.png) no-repeat;
+    background-size: 50px 50px;
+    width: 50px;
+    height: 50px;
+    border:none;
+}
+
+.downvoted{
+    background:url(../img/downvote_selected.png) no-repeat;
+    background-size: 50px 50px;
+    width: 50px;
+    height: 50px;
+    border:none;
+}
+
 .upvote:hover {
-    background: red;
+    background:url(../img/upvote_hover.png) no-repeat;
+    background-size: 50px 50px;
 }
 
 .downvote:hover {
-    background: blue;
+    background:url(../img/downvote_hover.png) no-repeat;
+    background-size: 50px 50px;
+}
+
+.upvoted:hover {
+    background:url(../img/upvote_hover.png) no-repeat;
+    background-size: 50px 50px;
+}
+
+.downvoted:hover {
+    background:url(../img/downvote_hover.png) no-repeat;
+    background-size: 50px 50px;
 }
 
 /*--------- REGISTRATION ------------*/
