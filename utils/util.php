@@ -122,13 +122,36 @@ function usernameExists($username): bool{
     return !empty(DbManager::getUserByAttribute($username));
 }
 
+
+
 /**
- * Checks if an e-mail exists in the database and returns a bool.
- *
- * @param $email string The e-mail to search for.
- *
- * @return bool If the email exists in the database.
+ * Gets username from JWT cookie.
+ * @return string The logged_in users username.
  */
-function emailExist($email): bool{
-	return !empty(DbManager::getUserByAttribute($email));
+
+function getJWTUsername(){
+    $jwt = $_COOKIE["logged_in"];
+    $username = "";
+
+    try{
+        $decodedJWT = JWT::decode($jwt, Config::getInstance()->getSetting("JWTSecretKey"));
+        $username = $decodedJWT->username;
+    }
+
+        // UnexpectedValueException occurs if signature is wrong.
+    catch (UnexpectedValueException $uve){
+        echo $uve->getMessage();
+        exit();
+    }
+
+    catch (DomainException $de){
+        echo $de->getMessage();
+        exit();
+    }
+
+    if (!($decodedJWT != null && ($decodedJWT->username))){
+        returnToIndex();
+    }
+
+    return $username;
 }

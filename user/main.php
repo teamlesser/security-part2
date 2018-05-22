@@ -12,8 +12,6 @@ session_start();
 require_once "../utils/util.php";
 require_once "../vendor/jwt_helper.php";
 
-
-
 // Will contain Message-objects if user is valid
 $messages = [];
 
@@ -33,30 +31,45 @@ if (!isset($_COOKIE["logged_in"])){
 	returnToIndex();
 
 }else{
-	$jwt = $_COOKIE["logged_in"];
-
-	try{
-		$decodedJWT = JWT::decode($jwt, Config::getInstance()->getSetting("JWTSecretKey"));
-        $username = $decodedJWT->username;
-	}
-
-		// UnexpectedValueException occurs if signature is wrong.
-	catch (UnexpectedValueException $uve){
-		echo $uve->getMessage();
-		exit();
-	}
-
-	catch (DomainException $de){
-		echo $de->getMessage();
-		exit();
-	}
-
-	if (!($decodedJWT != null && ($decodedJWT->username))){
-		returnToIndex();
-	}
-
+	$username = getJWTUsername();
 	$messages = DbManager::getAllMessages();
 }
+
+// Counts vote, if one was posted
+if ($_SERVER["REQUEST_METHOD"] == "POST"){
+    if (isset($_POST["vote"])){
+
+        // Checks that JWT is valid
+        $jwtVote = JWT::decode($_POST["vote"], Config::getInstance()->getSetting("JWTSecretKey"));
+
+        if ($jwtVote->username != null && $jwtVote->time != null && $jwtVote->vote != null && $jwtVote->postid != null){
+
+            // Checks that the vote is made by the logged in user
+            if ($jwtVote->username === $username){
+
+                $timeIssued = strtotime($jwtVote->time);
+                $timeNow = strtotime(date("Y-m-d H:i:s"));
+
+                $timeDifference = $timeNow - $timeIssued;
+
+                // If time difference is less than 5 minutes, the vote is made.
+                if ($timeDifference < 300){
+
+                    $postNum = htmlspecialchars($jwtVote->postid);
+                    $voteInt = htmlspecialchars($jwtVote->vote);
+
+                    // Do the vote
+                    DbManager::doVote($username, $postNum, $voteInt);
+
+                    // Force reload of the page, otherwise the cached results will be shown.
+                    // Also prevents re-submitting of form if refreshing
+                    header("location: {$_SERVER['PHP_SELF']}");
+                }
+            }
+        }
+    }
+}
+
 ?>
 
 <!--**** HTML-SECTION STARTS HERE ****-->
@@ -81,7 +94,7 @@ if (!isset($_COOKIE["logged_in"])){
 
     <h1>Messages</h1>
 
-    <div id="div-logged-in-as">Logged in as <?php echo $decodedJWT->username ?></div>
+    <div id="div-logged-in-as">Logged in as <?php echo $username ?></div>
 
     <br>
 
@@ -115,52 +128,67 @@ if (!isset($_COOKIE["logged_in"])){
 
     <div id="messages">
 
+        <?php $pageLoadTime = date("Y-m-d H:i:s"); ?>
+
 		<?php foreach ($messages as $message): ?>
+
+            <?php $jwtVoteArray = array("username"=>$username, "postid"=>$message->getMessageId(),
+                "time"=> $pageLoadTime); ?>
+
+            <?php $thisUserVote = DbManager::userHasVoted($username, $message->getMessageId()) ?>
+
             <div class="message">
+                <div class="voting">
+
+                    <?php $jwtVoteArray["vote"] = 1 ?>
+
+                    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+                        <button class="upvote<?php if($thisUserVote == 1){echo "d";}?>" type="submit" name="vote"
+                                value="<?php echo JWT::encode($jwtVoteArray, Config::getInstance()->getSetting("JWTSecretKey")) ?>" >
+                        </button>
+                    </form>
+
+                    <p class="count"><?php echo $message->getVotes(); ?></p>
+
+                    <?php $jwtVoteArray["vote"] = -1 ?>
+
+                    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+                        <button class="downvote<?php if($thisUserVote == -1){echo "d";}?>" type="submit" name="vote"
+                                value="<?php echo JWT::encode($jwtVoteArray, Config::getInstance()->getSetting("JWTSecretKey")) ?>">
+                        </button>
+                    </form>
+
+                </div>
+
+                <div class="message-contents">
                 <p><?php echo $message->getMessage() ?></p>
 
-                <div class="message-info">
+                    <div class="message-info">
 
-                    <p><span class="bold">By:</span> <?php echo $message->getUsername() ?></p>
+                        <p><span class="bold">By:</span> <?php echo $message->getUsername() ?></p>
 
-					<?php if (!empty($message->getKeywords())): ?>
-                        <p class="keyword"><span class="bold">Keywords:</span> <?php
-							foreach ($message->getKeywords() as $keyword){
-								echo $keyword . " ";
-							} ?></p>
-					<?php endif ?>
+                        <?php if (!empty($message->getKeywords())): ?>
+                            <p class="keyword"><span class="bold">Keywords:</span> <?php
+                                foreach ($message->getKeywords() as $keyword){
+                                    echo $keyword . " ";
+                                } ?></p>
+                        <?php endif ?>
 
-                    <p><span class="bold">Date:</span> <?php echo $message->getDate() ?></p>
+                        <p><span class="bold">Date:</span> <?php echo $message->getDate() ?></p>
 
-                    <?php if ($username === $message->getUsername()): ?>
+                        <?php if ($username === $message->getUsername()): ?>
 
-                        <form action="deleteMessage.php" method="post">
-                            <button type="submit" value="<?php echo $message->getMessageId(); ?>"
-                                    name="delete">Delete</button>
-                        </form>
+                            <form action="deleteMessage.php" method="post">
+                                <button type="submit" value="<?php echo $message->getMessageId(); ?>"
+                                        name="delete">Delete</button>
+                            </form>
 
-                    <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
 		<?php endforeach; ?>
 
-    </div>
-
-    <!-- A general test on the order of the elements in a message. Needs to be styled in CSS. -->
-    <!-- We also need to somehow generate messages in this format, probably with a for-loop in JS. -->
-    <!-- One question is how we will safely convey which message should be upvoted, could the user -->
-    <!-- Modify the page source and set for example the id of one post to another? -->
-    <h4>Dummy message</h4>
-
-    <div class="message">
-        <input type="image" src="../img/upvote_unselected.png" alt="Submit" width="48" height="48">
-        <p>0</p>
-        <input type="image" src="../img/downvote_unselected.png" alt="Submit" width="48"
-               height="48">
-        <p>Hello world!</p>
-        <p>By: Username</p>
-        <p>Keywords: keyword wordkey</p>
-        <p>Date: yyyy-mm-dd</p>
     </div>
 
 </main>

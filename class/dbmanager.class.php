@@ -471,4 +471,100 @@ class DbManager{
 	}
 
 
+    /**
+     * Gets the votes for a post.
+     * @param $postId int The id of the message.
+     * @return int The amount of votes.
+     */
+    public static function getVotes($postId){
+        $query = "SELECT SUM(vote.vote)
+        FROM securitylab.vote
+        WHERE message_id = $1; ";
+
+        $param = array($postId);
+        $db = Database::getInstance();
+        $result = $db->doParamQuery($query, $param);
+        $sum = pg_fetch_result($result, 0, 0);
+        pg_free_result($result);
+
+        if ($sum == null){
+            return 0;
+        }
+
+        return $sum;
+    }
+
+    /**
+     * Checks if user has voted on a post.
+     * @param $username string Username
+     * @param $postId int Message id
+     * @return bool
+     */
+    public static function userHasVoted($username, $postId) {
+        $query = "SELECT vote.vote FROM securitylab.vote 
+              WHERE user_id = (SELECT id FROM securitylab.users WHERE username = $1) AND message_id = $2;";
+        $param = array($username, $postId);
+
+        $db = Database::getInstance();
+        $result = $db->doParamQuery($query, $param);
+
+        if ($result == null){
+            return false;
+        } else {
+            // Return what the user had voted previously
+            $vote = pg_fetch_array($result);
+            pg_free_result($result);
+            return $vote[0];
+        }
+    }
+
+    /**
+     * Does a vote by comparing if the user has voted first.
+     * The row is either deleted, inserted or updated.
+     * @param $username string Username of voter.
+     * @param $postId int Message id
+     * @param $vote int The vote value (1 = up, -1 = down)
+     * @return bool If the vote could be executed.
+     */
+    public static function doVote($username, $postId, $vote){
+        $voteResult = self::userHasVoted($username, $postId);
+
+        $query = "";
+        $param = array();
+
+        if ($vote == 1 || $vote == -1){
+            if ($voteResult == false){
+                // Create new entry
+                $query = "INSERT INTO securitylab.vote (user_id, message_id, vote)
+                VALUES ((SELECT id FROM securitylab.users WHERE username = $1), $2, $3);";
+                $param = array($username, $postId, $vote);
+
+            } else if ($vote == $voteResult) {
+                // Delete entry
+                $query = "DELETE FROM securitylab.vote WHERE user_id =
+                (SELECT id FROM securitylab.users WHERE username = $1) AND message_id = $2;";
+                $param = array($username, $postId);
+
+            } else {
+                // alter entry
+                $query = "UPDATE securitylab.vote 
+                SET vote = $1
+                WHERE user_id =(SELECT id FROM securitylab.users WHERE username = $2) 
+                AND message_id = $3;";
+
+                $param = array($vote, $username, $postId);
+            }
+
+            $db = Database::getInstance();
+            $result = $db->doParamQuery($query, $param);
+
+            if ($result != false){
+                pg_free_result($result);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 }

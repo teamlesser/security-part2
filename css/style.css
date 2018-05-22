@@ -109,6 +109,7 @@ font, center, s, u, b, i {
     padding: 20px;
     margin: 10px 0;
     background-color: white;
+     overflow: auto;
 }
 
 .message-info {
@@ -118,6 +119,74 @@ font, center, s, u, b, i {
 .message p {
     margin: 0;
     padding: 0;
+}
+
+.message-contents{
+    padding: 10px;
+}
+
+.voting {
+    float: left;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.count {
+    text-align: center;
+    font-weight: bolder;
+    font-size: larger;
+}
+
+.upvote{
+    background:url(../img/upvote_unselected.png) no-repeat;
+    background-size: 50px 50px;
+    width: 50px;
+    height: 50px;
+    border:none;
+}
+
+.upvoted{
+    background:url(../img/upvote_selected.png) no-repeat;
+    background-size: 50px 50px;
+    width: 50px;
+    height: 50px;
+    border:none;
+}
+
+.downvote{
+    background:url(../img/downvote_unselected.png) no-repeat;
+    background-size: 50px 50px;
+    width: 50px;
+    height: 50px;
+    border:none;
+}
+
+.downvoted{
+    background:url(../img/downvote_selected.png) no-repeat;
+    background-size: 50px 50px;
+    width: 50px;
+    height: 50px;
+    border:none;
+}
+
+.upvote:hover {
+    background:url(../img/upvote_hover.png) no-repeat;
+    background-size: 50px 50px;
+}
+
+.downvote:hover {
+    background:url(../img/downvote_hover.png) no-repeat;
+    background-size: 50px 50px;
+}
+
+.upvoted:hover {
+    background:url(../img/upvote_hover.png) no-repeat;
+    background-size: 50px 50px;
+}
+
+.downvoted:hover {
+    background:url(../img/downvote_hover.png) no-repeat;
+    background-size: 50px 50px;
 }
 
 /*--------- REGISTRATION ------------*/
