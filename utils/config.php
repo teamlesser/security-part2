@@ -23,7 +23,7 @@ return array(
     "debug" => true,
 
     // SMTP Connection
-    "SMTPDebug" => 2,                               // SMTP Debugging : 1 = errors and messages, 2 = messages only
+    "SMTPDebug" => 0,                               // SMTP Debugging : 1 = errors and messages, 2 = messages only
     "SMTPAuth" => true,                             // If authentication should be enabled
     "SMTPSecure" => "tls",                          // Secure transfer enabled (REQUIRED for Gmail)
     "SMTPHost" => "smtp.gmail.com",                 // Our SMTP host
