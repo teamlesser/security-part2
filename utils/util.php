@@ -121,3 +121,14 @@ function destroyCookie(){
 function usernameExists($username): bool{
     return !empty(DbManager::getUserByAttribute($username));
 }
+
+/**
+ * Checks if an e-mail exists in the database and returns a bool.
+ *
+ * @param $email string The e-mail to search for.
+ *
+ * @return bool If the email exists in the database.
+ */
+function emailExist($email): bool{
+	return !empty(DbManager::getUserByAttribute($email));
+}
