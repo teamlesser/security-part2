@@ -6,9 +6,7 @@
  *
  * Date: 2018-05-08
  ******************************************************************************/
-require_once "../class/mailer.class.php";
-require_once "../class/config.class.php";
-require_once "../class/database.class.php";
+require_once "../utils/util.php";
  
 $response = array(
     "status" => false,
@@ -42,7 +40,7 @@ function emailExist($email): bool {
  * @param $email string The e-mail to search for.
  * @return bool If the email exists in the database.
  */
-function getUserID($email): integer {
+function getUserID($email): int {
 
 	$query = "SELECT user_id FROM securitylab.users WHERE email = $1);";
 	$param = array($email);
@@ -117,7 +115,8 @@ function deleteResetToken($userid) : void {
     $db = Database::getInstance();
     $db->doParamQuery($query, $param);
 }
-	
+
+$noMatchMessage = "Either your email or password is wrong";
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
 	
 	// Create an instance of mailer
@@ -132,22 +131,23 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 	
 	if($newpass1 != $newpass2) { // Check if the passwords match
 		
-		$response["message"] = "The passwords you entered does not match eithother";
+		$response["message"] = $noMatchMessage;
 	
 	} else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { // Check if the email entered is valid
 		
-		$response["message"] = "The email you entered is not valid.";
+		$response["message"] = $noMatchMessage;
 		
 	} else if (!emailExist($email)) { // Check if the email exists
 		
-		$response["message"] = "The email you entered does not exist.";
+		$response["message"] = $noMatchMessage;
 	
 	} else {
 		
 		$userid = getUserID($email);
 		if($userid > 0) {
 			
-			if(!resetTokenIDMatch($userid, $resetToken) { // Check if the reset token matches the email
+			if(!resetTokenIDMatch($userid, $resetToken)) { // Check if the reset token matches
+				// the email
 			
 				$response["message"] = "The email and token you entered does not match.";
 			
@@ -155,24 +155,18 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 				
 				if(changePassword($email, $newpass1)) { // Attempt to change the email
 
-					$response["message"] = "Your password was changed. An confirmation mail should have been sent to your email.";
+					$response["message"] = "Your password was changed. A confirmation mail should have been sent to your email.";
 					$response["success"] = true;
 					$mailer->sendResetPasswordConfirmationEmail($email); // Send an confirmation email
 				
 				} else {
-
 					$response["message"] = "Your password could not be changed. Please contact customer service.";
-				
 				}
-				
 			}
 			
 		} else {
-				
 			$response["message"] = "There are no user connected to that email";
-				
 		}
-		
 	}
 	
 	header('Content-Type: application/json');

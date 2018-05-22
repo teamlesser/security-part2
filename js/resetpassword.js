@@ -38,8 +38,8 @@ function main() {
  * Function doResetPassword
  ******************************************************************************/
 function doResetPassword() {
-
-    if (byId('email-field').value != "" && byId('newpass1-field').value != "" && byId('newpass2-field').value != '' && byId('resettoken-field').value != '') {
+    if (byId('email-field').value !== "" && byId('newpass1-field').value !== "" &&
+        byId('newpass2-field').value !=='' && byId('resettoken-field').value !== '') {
 		
 		// For later: encrypt the json data before sending it. Only possible if we can use additional libraries such as crypto.js
         var data = JSON.stringify(
@@ -53,6 +53,8 @@ function doResetPassword() {
         xhr.open('POST', 'user/resetpassword.php', true);
         xhr.setRequestHeader("Content-type", "application/json");
         xhr.send(data);
+    }else{
+        byId("fill-all-fields").innerHTML = "You must fill fill in all fields";
     }
 }
 
