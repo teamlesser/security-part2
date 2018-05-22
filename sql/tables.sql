@@ -59,7 +59,7 @@ CREATE TABLE securitylab.verify(
   id SERIAL NOT NULL PRIMARY KEY,
   user_id INTEGER UNIQUE NOT NULL REFERENCES securitylab.users(id),
   verify_token VARCHAR(256) NOT NULL CHECK (verify_token <> ''::text),
-  verify_token_inserted_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  verify_token_inserted_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Creates reset-table
@@ -69,7 +69,7 @@ CREATE TABLE securitylab.reset(
   id SERIAL NOT NULL PRIMARY KEY,
   user_id INTEGER UNIQUE NOT NULL REFERENCES securitylab.users(id),
   reset_token VARCHAR(256) NOT NULL CHECK (reset_token <> ''::text),
-  reset_token_inserted_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  reset_token_inserted_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 
