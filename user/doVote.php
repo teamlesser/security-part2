@@ -7,42 +7,53 @@ include_once "../utils/util.php";
 require_once "../vendor/jwt_helper.php";
 
 // Check that user is logged in, otherwise kick them out to index
-if(!isset($_COOKIE["logged_in"])){
-    returnToIndex();
-}
+if (!isset($_COOKIE["logged_in"])){
+	returnToIndex();
+}else{
 
 // Get username from JWT
-$username = getJWTUsername();
+	$username = getJWTUsername();
 
-if($_SERVER["REQUEST_METHOD"] == "GET"){
+	$response = [];
 
-    if (isset($_GET["vote"]) && isset($_GET["id"])){
+	if ($_SERVER["REQUEST_METHOD"] == "GET"){
 
-        $voteType = htmlspecialchars($_GET["vote"]);
-        $postNum = htmlspecialchars($_GET["id"]);
+		if (isset($_GET["vote"]) && isset($_GET["id"])){
 
-        if ($voteType === "up" || $voteType === "down"){
+			$voteType = htmlspecialchars($_GET["vote"]);
+			$postNum = htmlspecialchars($_GET["id"]);
 
-            if (DbManager::getMessageById($postNum) != null){
+			if ($voteType === "up" || $voteType === "down"){
 
-                $voteInt = ($voteType === "up" ? 1 : -1);
+				if (DbManager::getMessageById($postNum) != null){
 
-                if (DbManager::doVote($username, $postNum, $voteInt)){
-                    echo "Your vote was counted.";
-                } else {
-                    echo "Database error.";
-                }
-            }
+					$voteInt = ($voteType === "up" ? 1 : - 1);
 
-            else {
-                echo "Invalid vote number";
-            }
-        }
+					if (DbManager::doVote($username, $postNum, $voteInt)){
+						$response["status"] = "success";
+						$response["message"] = "Your vote was counted";
+						//echo "Your vote was counted.";
+					}else{
+						$response["status"] = "fail";
+						$response["message"] = "Error getting your vote";
+						//echo "Database error.";
+					}
+				}else{
+					$response["status"] = "fail";
+					$response["message"] = "Invalid vote number";
+					//echo "Invalid vote number";
+				}
+			}else{
+				$response["status"] = "fail";
+				$response["message"] = "Invalid vote type";
+				//echo "Invalid vote type";
+			}
 
-        else {
-            echo "Invalid vote type";
-        }
 
-
-    }
+		}
+	}
+	echo "<!DOCTYPE html><html><head><title>Voting response</title><script>" .
+	     "window.setTimeout(function() {
+    window.location.href = 'main.php';}, 2000)</script></head><body>" .
+	     "<p>" . $response['message'] . "</p></body></html>";
 }

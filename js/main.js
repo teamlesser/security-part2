@@ -26,7 +26,7 @@ function main(){
 
     //Adds EventListeners to post message button.
     byId("button-post-message").addEventListener('click', doPostMessage, false);
-
+    changeImages();
     // Creates matching XMLHttpRequest-object
     try {
         if (window.XMLHttpRequest) {
@@ -94,6 +94,25 @@ function doPostMessage() {
 }
 
 /**
+ * Change the image on hover
+ */
+function changeImages() {
+    var downVotes = document.getElementsByClassName("downvote");
+    var upVotes = document.getElementsByClassName("upvote");
+
+    for (var i = 0; i < downVotes.length; i++) {
+        downVotes[i].addEventListener("mouseover", function () {
+            this.src = "../img/downvote_hover.png";
+        }, false);
+    }
+    for (var i = 0; i < upVotes.length; i++) {
+        upVotes[i].addEventListener("mouseover", function () {
+            this.src = "../img/upvote_hover.png";
+        }, false);
+    }
+
+}
+/**
  * Processes the received response from the
  * server when attempting to login.
  */
@@ -111,9 +130,11 @@ function processPostMessage(){
         byId("return-message").innerHTML = response.message;
 
         if (response.status === "success"){
-            // TODO: Update page to show messages by date after posting,
             // on success the processPostMessage should
             // send back an array with posts.
+            setTimeout(function(){
+                window.location.reload(1);
+            }, 0);
 
             // Empties post fields
             byId("textarea-message").value = "";
