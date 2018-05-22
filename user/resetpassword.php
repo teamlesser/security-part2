@@ -38,15 +38,34 @@ function emailExist($email): bool {
 }
 
 /**
+ * Gets the user id from the users table based on an email address
+ * @param $email string The e-mail to search for.
+ * @return bool If the email exists in the database.
+ */
+function getUserID($email): integer {
+
+	$query = "SELECT user_id FROM securitylab.users WHERE email = $1);";
+	$param = array($email);
+	
+	$db = Database::getInstance();
+	$result = $db->doParamQuery($query, $param);
+	
+	if($result == null || $result == "f")
+		return 0;
+	else 
+		return $result;
+}
+
+/**
 * Check if the email entered matches with the users reset token 
 * @var $email The email to check in the users table
 * @var $resetToken The reset token
 * @returns boolean True if the reset token exists in the row of the user, based on his/her email
 */
-function resetTokenEmailMatch($email, $resetToken) : bool {
+function resetTokenIDMatch($userid, $resetToken) : bool {
 	
-	$query = "SELECT COUNT(*) FROM securitylab.users WHERE email = $1 AND resettoken = $2 IS NOT NULL";
-    $param = array($email, $resetToken);
+	$query = "SELECT COUNT(*) FROM securitylab.reset WHERE user_id = $1 AND reset_token = $2 IS NOT NULL";
+    $param = array($userid, $resetToken);
 
     // Result only returns a boolean
     $db = Database::getInstance();
@@ -89,10 +108,10 @@ function changePassword($email, $newPassword) : bool {
  * @var $email The email to check in the users table
  * @returns boolean True if it was deleted, otherwise false
  */
-function deleteResetToken($email) : void {
+function deleteResetToken($userid) : void {
 	
-	$query = "UPDATE securitylab.users SET resettoken = NULL, resettokendate = NULL WHERE email = $1";
-    $param = array($email);
+	$query = "UPDATE securitylab.reset SET reset_token = NULL, reset_token_inserted_time = NULL WHERE user_id = $1";
+    $param = array($userid);
 
     // Result does not really need to return anything
     $db = Database::getInstance();
@@ -122,23 +141,36 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 	} else if (!emailExist($email)) { // Check if the email exists
 		
 		$response["message"] = "The email you entered does not exist.";
-		
-	} else if (!resetTokenEmailMatch($email, $resetToken)) { // Check if the reset token matches the email
-		
-		$response["message"] = "The email and token you entered does not match.";
 	
 	} else {
 		
-		if(changePassword($email, $newpass1)) { // Attempt to change the email
+		$userid = getUserID($email);
+		if($userid > 0) {
+			
+			if(!resetTokenIDMatch($userid, $resetToken) { // Check if the reset token matches the email
+			
+				$response["message"] = "The email and token you entered does not match.";
+			
+			} else {
+				
+				if(changePassword($email, $newpass1)) { // Attempt to change the email
 
-			$response["message"] = "Your password was changed. An confirmation mail should have been sent to your email.";
-			$response["success"] = true;
-			$mailer->sendResetPasswordConfirmationEmail($email); // Send an confirmation email
-		
+					$response["message"] = "Your password was changed. An confirmation mail should have been sent to your email.";
+					$response["success"] = true;
+					$mailer->sendResetPasswordConfirmationEmail($email); // Send an confirmation email
+				
+				} else {
+
+					$response["message"] = "Your password could not be changed. Please contact customer service.";
+				
+				}
+				
+			}
+			
 		} else {
-
-			$response["message"] = "Your password could not be changed. Please contact customer service.";
-		
+				
+			$response["message"] = "There are no user connected to that email";
+				
 		}
 		
 	}
