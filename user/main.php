@@ -21,6 +21,9 @@ $decodedJWT = "";
 // User username if JWT is valid.
 $username = "";
 
+// If user searched for something
+$searched = false;
+
 // Clears postid for session (one that the user thought about deleting)
 unset($_SESSION["deleteAuthValue"]);
 setcookie('delete_auth', null, -1, '/securitylab/user/');
@@ -32,7 +35,6 @@ if (!isset($_COOKIE["logged_in"])){
 
 }else{
 	$username = getJWTUsername();
-	$messages = DbManager::getAllMessages();
 }
 
 // Counts vote, if one was posted
@@ -67,7 +69,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
                 }
             }
         }
+    } else if (isset($_POST["keyword_search"])) {
+
+        $keyword = htmlspecialchars($_POST["keyword_search"]);
+        $messages = DbManager::getMessagesByKeyword($keyword);
+        $searched = true;
+
+    } else if (isset($_POST["user_search"])){
+
+        $usernameSearch = htmlspecialchars($_POST["user_search"]);
+        $messages = DbManager::getMessageByUserName($usernameSearch);
+        $searched = true;
+
+    } else if (isset($_POST["sort_popularity"])){
+        $messages = DbManager::getMessagesSortedByVote();
+    } else if (isset($_POST["sort_date"])){
+        $messages = DbManager::getMessagesSortedByDate();
     }
+} else {
+
+    $messages = DbManager::getAllMessages();
+
 }
 
 ?>
@@ -87,12 +109,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
 <body>
 
 <header>
-
+    <h1>Messages</h1>
 </header>
 
 <main>
-
-    <h1>Messages</h1>
 
     <div id="div-logged-in-as">Logged in as <?php echo $username ?></div>
 
@@ -103,26 +123,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
 
     <br>
 
-    <label for="input-keywords">Keywords</label><input id="input-keywords"
-                                                       placeholder="Keywords...">
+    <label for="input-keywords">Keywords</label>
+    <input id="input-keywords" placeholder="Keywords...">
     <button id="button-post-message">Post</button>
 
     <div id="return-message"></div>
 
     <br>
 
-    <button id="button-sort-popularity">Sort by popularity</button>
-    <button id="button-sort-date">Sort by date</button>
+    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+        <button id="button-sort-popularity" name="sort_popularity" type="submit">Sort all by popularity</button>
+        <button id="button-sort-date" name="sort_date" type="submit">Sort all by date</button>
+    </form>
 
-    <br><br>
+    <br>
 
-    <input id="input-search-by-user" placeholder="Search by user...">
-    <button id="button-search-by-user">Search</button>
+    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+        <input id="input-search-by-user" placeholder="Search by user..." name="user_search">
+        <button id="button-search-by-user" type="submit">Search</button>
+    </form>
 
-    <br><br>
+    <br>
 
-    <input id="input-search-by-keyword" placeholder="Search by keyword...">
-    <button id="button-search-by-keyword">Search</button>
+    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+        <input id="input-search-by-keyword" placeholder="Search by keyword..." name="keyword_search">
+        <button id="button-search-by-keyword" type="submit">Search</button>
+    </form>
 
     <br>
 
@@ -130,64 +156,72 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
 
         <?php $pageLoadTime = date("Y-m-d H:i:s"); ?>
 
-		<?php foreach ($messages as $message): ?>
+        <?php if (!empty($messages)): ?>
+            <?php foreach ($messages as $message): ?>
 
-            <?php $jwtVoteArray = array("username"=>$username, "postid"=>$message->getMessageId(),
-                "time"=> $pageLoadTime); ?>
+                <?php $jwtVoteArray = array("username"=>$username, "postid"=>$message->getMessageId(),
+                    "time"=> $pageLoadTime); ?>
 
-            <?php $thisUserVote = DbManager::userHasVoted($username, $message->getMessageId()) ?>
+                <?php $thisUserVote = DbManager::userHasVoted($username, $message->getMessageId()) ?>
 
-            <div class="message">
-                <div class="voting">
+                <div class="message">
+                    <div class="voting">
 
-                    <?php $jwtVoteArray["vote"] = 1 ?>
+                        <?php $jwtVoteArray["vote"] = 1 ?>
 
-                    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-                        <button class="upvote<?php if($thisUserVote == 1){echo "d";}?>" type="submit" name="vote"
-                                value="<?php echo JWT::encode($jwtVoteArray, Config::getInstance()->getSetting("JWTSecretKey")) ?>" >
-                        </button>
-                    </form>
+                        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+                            <button class="upvote<?php if($thisUserVote == 1){echo "d";}?>" type="submit" name="vote"
+                                    value="<?php echo JWT::encode($jwtVoteArray, Config::getInstance()->getSetting("JWTSecretKey")) ?>" >
+                            </button>
+                        </form>
 
-                    <p class="count"><?php echo $message->getVotes(); ?></p>
+                        <p class="count"><?php echo $message->getVotes(); ?></p>
 
-                    <?php $jwtVoteArray["vote"] = -1 ?>
+                        <?php $jwtVoteArray["vote"] = -1 ?>
 
-                    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-                        <button class="downvote<?php if($thisUserVote == -1){echo "d";}?>" type="submit" name="vote"
-                                value="<?php echo JWT::encode($jwtVoteArray, Config::getInstance()->getSetting("JWTSecretKey")) ?>">
-                        </button>
-                    </form>
+                        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+                            <button class="downvote<?php if($thisUserVote == -1){echo "d";}?>" type="submit" name="vote"
+                                    value="<?php echo JWT::encode($jwtVoteArray, Config::getInstance()->getSetting("JWTSecretKey")) ?>">
+                            </button>
+                        </form>
 
-                </div>
+                    </div>
 
-                <div class="message-contents">
-                <p><?php echo $message->getMessage() ?></p>
+                    <div class="message-contents">
+                    <p><?php echo $message->getMessage() ?></p>
 
-                    <div class="message-info">
+                        <div class="message-info">
 
-                        <p><span class="bold">By:</span> <?php echo $message->getUsername() ?></p>
+                            <p><span class="bold">By:</span> <?php echo $message->getUsername() ?></p>
 
-                        <?php if (!empty($message->getKeywords())): ?>
-                            <p class="keyword"><span class="bold">Keywords:</span> <?php
-                                foreach ($message->getKeywords() as $keyword){
-                                    echo $keyword . " ";
-                                } ?></p>
-                        <?php endif ?>
+                            <?php if (!empty($message->getKeywords())): ?>
+                                <p class="keyword"><span class="bold">Keywords:</span> <?php
+                                    foreach ($message->getKeywords() as $keyword){
+                                        echo $keyword . " ";
+                                    } ?></p>
+                            <?php endif ?>
 
-                        <p><span class="bold">Date:</span> <?php echo $message->getDate() ?></p>
+                            <p><span class="bold">Date:</span> <?php echo $message->getDate() ?></p>
 
-                        <?php if ($username === $message->getUsername()): ?>
+                            <?php if ($username === $message->getUsername()): ?>
 
-                            <form action="deleteMessage.php" method="post">
-                                <button type="submit" value="<?php echo $message->getMessageId(); ?>"
-                                        name="delete">Delete</button>
-                            </form>
+                                <form action="deleteMessage.php" method="post">
+                                    <button type="submit" value="<?php echo $message->getMessageId(); ?>"
+                                            name="delete">Delete</button>
+                                </form>
 
-                        <?php endif; ?>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
-            </div>
-		<?php endforeach; ?>
+            <?php endforeach; ?>
+
+            <?php if ($searched): ?>
+                <p class="message-result"><a href='main.php'>Show all messages</a></p>
+            <?php endif; ?>
+        <?php else: ?>
+            <p class="message-result">No posts found. <?php if ($searched) {echo "<a href='main.php'>Go back?</a>";}?></p>
+        <?php endif; ?>
 
     </div>
 

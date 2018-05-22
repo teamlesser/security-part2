@@ -17,9 +17,6 @@ class Message{
 	private $keywords;      // string[] for keywords for the post
 	private $votes;         // number of votes for this message
 
-	// What the value for voting is
-	private $votes;
-
 	/**
 	 * Message constructor. Sets data members and gets keywords for post.
 	 *
@@ -40,7 +37,9 @@ class Message{
 
 		// Asks for keywords for post
 		$this->keywords = DbManager::getPostKeyword($this->messageId);
-		$this->votes = DbManager::getVotes($this->messageId);
+
+		// Asks for amount of votes
+		$this->votes = DbManager::getMessageVotes($this->messageId);
 	}
 
     /**
@@ -84,15 +83,6 @@ class Message{
 	 */
 	public function getUsername(): string{
 		return $this->username;
-	}
-
-	/**
-	 * Get the number of votes that this message has had so far.
-	 *
-	 * @return int number of votes or -999 if wrong message id
-	 */
-	public function getVoteSum(): int{
-		return DbManager::getMessageVotes($this->messageId);
 	}
 
 	/**

@@ -362,6 +362,35 @@ class DbManager{
 		return $msg;
 	}
 
+    /**
+     * Gets messages by keyword.
+     * @param string $keyword The keyword of the post.
+     * @return array An array of messages.
+     */
+	public static function getMessagesByKeyword(string $keyword){
+        $query = "SELECT message.id, users.username, message.message, message.date
+            FROM securitylab.message 
+            INNER JOIN securitylab.users ON users.id = message.user_id
+            WHERE message.id IN (SELECT message_id FROM securitylab.keyword WHERE keyword = $1)
+            ORDER BY date DESC;";
+        $param = array($keyword);
+
+        $db = Database::getInstance();
+        $result = $db->doParamQuery($query, $param);
+
+        // Message[]
+        $messages = [];
+
+        while ($row = pg_fetch_row($result)){
+            $messages[] = new Message($row[0], $row[1], $row[2], $row[3]);
+        }
+
+        pg_free_result($result);
+
+        return $messages;
+    }
+
+
 	/**
 	 * Deletes a post from the database by id.
 	 *
@@ -404,6 +433,7 @@ class DbManager{
 		$results = Database::getInstance()->doParamQuery($query, $params);
 		if ($results && pg_affected_rows($results) > 0){
 			$count = intval(pg_fetch_result($results, 0, 'sum'));
+			pg_free_result($results);
 		}
 
 		return $count;
@@ -436,34 +466,11 @@ class DbManager{
 
 		// Desc sort
 		usort($messages, function (Message $lhs, Message $rhs){
-			return $lhs->getVoteSum() < $rhs->getVoteSum();
+			return $lhs->getVotes() < $rhs->getVotes();
 		});
 
 		return $messages;
 	}
-
-    /**
-     * Gets the votes for a post.
-     * @param $postId int The id of the message.
-     * @return int The amount of votes.
-     */
-    public static function getVotes($postId){
-        $query = "SELECT SUM(vote.vote)
-        FROM securitylab.vote
-        WHERE message_id = $1; ";
-
-        $param = array($postId);
-        $db = Database::getInstance();
-        $result = $db->doParamQuery($query, $param);
-        $sum = pg_fetch_result($result, 0, 0);
-        pg_free_result($result);
-
-        if ($sum == null){
-            return 0;
-        }
-
-        return $sum;
-    }
 
     /**
      * Checks if user has voted on a post.
