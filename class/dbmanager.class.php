@@ -250,28 +250,6 @@ class DbManager{
 		return $messages;
 	}
 
-	/**
-	 * Get a message by attribute
-	 *
-	 * @param $attribute
-	 *
-	 * @return array
-	 */
-	public static function getMessageByKeyword(string $attribute): array{
-		$messages = self::getAllMessages();
-		$message = [];
-		if (!empty($messages)){
-			foreach ($messages as $array){
-				if (in_array($attribute, $array, true)){
-					$message = $array;
-					break;
-				}
-			}
-		}
-
-		return $message;
-	}
-
 	// Post a keyword
 
 	/**
@@ -316,83 +294,153 @@ class DbManager{
 	}
 
 
-    /**
-     * Checks that the message exists and is owned by the user.
-     * @param $username string Username of the user.
-     * @param $postId int Post id.
-     * @return bool If the post is owned by the user and both exist.
-     */
-    public static function messageExistsAndIsOwnedByUser($username, $postId):bool {
-        $query = "SELECT EXISTS (
+	/**
+	 * Checks that the message exists and is owned by the user.
+	 *
+	 * @param $username string Username of the user.
+	 * @param $postId   int Post id.
+	 *
+	 * @return bool If the post is owned by the user and both exist.
+	 */
+	public static function messageExistsAndIsOwnedByUser($username, $postId): bool{
+		$query
+			= "SELECT EXISTS (
         SELECT * FROM securitylab.users 
         INNER JOIN securitylab.message ON message.user_id = users.id 
         WHERE username = $1 AND message.id = $2);";
 
-        $param = array($username, $postId);
+		$param = array($username, $postId);
 
-        // Result only returns a boolean
-        $db = Database::getInstance();
-        $result = $db->doParamQuery($query, $param);
-        $bool = pg_fetch_result($result, 0, 0);
-        pg_free_result($result);
+		// Result only returns a boolean
+		$db = Database::getInstance();
+		$result = $db->doParamQuery($query, $param);
+		$bool = pg_fetch_result($result, 0, 0);
+		pg_free_result($result);
 
-        // "t" is true, "f" is false
-        if ($bool == null || $bool == "f"){
-            return false;
-        } else {
-            return true;
-        }
-    }
+		// "t" is true, "f" is false
+		if ($bool == null || $bool == "f"){
+			return false;
+		}else{
+			return true;
+		}
+	}
 
-    /**
-     * Gets a message by id.
-     * @param $postId int Id of the message.
-     * @return Message|null A message object.
-     */
-    public static function getMessageById($postId) {
+	/**
+	 * Gets a message by id.
+	 *
+	 * @param $postId int Id of the message.
+	 *
+	 * @return Message|null A message object.
+	 */
+	public static function getMessageById($postId): Message{
+		$messages = self::getAllMessages();
+		$msg = null;
+		foreach ($messages as $message){
+			if ($message->getMessageId() === intval($postId)){
+				$msg = $message;
+				break;
+			}
+		}
 
-        $query = "SELECT message.id, users.username, message.message, message.date FROM securitylab.message
-        INNER JOIN securitylab.users ON users.id = message.user_id
-        WHERE message.id = $1;";
+		return $msg;
+	}
 
-        $param = array($postId);
+	/**
+	 * @param string $username
+	 *
+	 * @return array all messsages by the user
+	 */
+	public static function getMessageByUserName(string $username): array{
+		$messages = self::getAllMessages();
+		$msg = [];
+		foreach ($messages as $message){
+			if ($message->getUsername() === $username){
+				$msg[] = $message;
+			}
+		}
 
-        // Result only returns a boolean
-        $db = Database::getInstance();
-        $result = $db->doParamQuery($query, $param);
+		return $msg;
+	}
 
-        if ($result){
-            $msgData = pg_fetch_row($result, 0);
-            pg_free_result($result);
-            $message = new Message($msgData[0], $msgData[1], $msgData[2], $msgData[3]);
-            return $message;
-        }
+	/**
+	 * Deletes a post from the database by id.
+	 *
+	 * @param $postId int Id of the post
+	 *
+	 * @return bool If the post could be deleted.
+	 */
+	public static function deletePost($postId){
+		$query = "DELETE FROM securitylab.message " .
+		         "WHERE message.id = $1;";
 
-        return null;
-    }
+		$param = array($postId);
+		$db = Database::getInstance();
+		$result = $db->doParamQuery($query, $param);
 
-    /**
-     * Deletes a post from the database by id.
-     * @param $postId int Id of the post
-     * @return bool If the post could be deleted.
-     */
-    public static function deletePost($postId) {
-        $query = "DELETE FROM securitylab.message
-        WHERE message.id = $1;";
+		$countDeleted = pg_affected_rows($result);
+		pg_free_result($result);
 
-        $param = array($postId);
-        $db = Database::getInstance();
-        $result = $db->doParamQuery($query, $param);
+		if ($countDeleted == 1){
+			return true;
+		}
 
-        $countDeleted = pg_affected_rows($result);
-        pg_free_result($result);
+		return false;
+	}
 
-        if ($countDeleted == 1){
-            return true;
-        }
+	/**
+	 * Get the number of votes that a message has
+	 *
+	 * @param $messageId
+	 *
+	 * @return int The number of votes or the message or -999 if wrong message id
+	 */
+	public static function getMessageVotes($messageId){
+		$query = "SELECT sum(vote) FROM securitylab.vote v " .
+		         "WHERE v.message_id = $1;";
 
-        return false;
-    }
+		$params = array($messageId);
+
+		$count = - 999;
+		$results = Database::getInstance()->doParamQuery($query, $params);
+		if ($results && pg_affected_rows($results) > 0){
+			$count = intval(pg_fetch_result($results, 0, 'sum'));
+		}
+
+		return $count;
+
+	}
+
+	/**
+	 * Get messages sorted by an attribute date|popularity
+	 *
+	 * @return array
+	 */
+	public static function getMessagesSortedByDate(): array{
+
+		$messages = self::getAllMessages();
+
+		usort($messages, function (Message $lhs, Message $rhs){
+			return $lhs->getDate() < $rhs->getDate();
+		});
+
+		return $messages;
+	}
+
+	/**
+	 * Get messages sorted by popularity (number of positive votes)
+	 *
+	 * @return array all messages sorted by number of vote
+	 */
+	public static function getMessagesSortedByVote(): array{
+		$messages = self::getAllMessages();
+
+		// Desc sort
+		usort($messages, function (Message $lhs, Message $rhs){
+			return $lhs->getVoteSum() < $rhs->getVoteSum();
+		});
+
+		return $messages;
+	}
 
     /**
      * Gets the votes for a post.

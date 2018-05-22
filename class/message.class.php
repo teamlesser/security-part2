@@ -9,20 +9,13 @@
  * Date: 2018-05-19
  ******************************************************************************/
 class Message{
-	// Message id
-	private $messageId;
 
-	// Poster username
-	private $username;
-
-	// The message itself
-	private $message;
-
-	// The date and time for the post
-	private $date;
-
-	// string[] for keywords for the post
-	private $keywords;
+	private $messageId;     // Message id
+	private $username;      // Poster username
+	private $message;       // The message itself
+	private $date;          // The date and time for the post
+	private $keywords;      // string[] for keywords for the post
+	private $votes;         // number of votes for this message
 
 	// What the value for voting is
 	private $votes;
@@ -93,10 +86,26 @@ class Message{
 		return $this->username;
 	}
 
+	/**
+	 * Get the number of votes that this message has had so far.
+	 *
+	 * @return int number of votes or -999 if wrong message id
+	 */
+	public function getVoteSum(): int{
+		return DbManager::getMessageVotes($this->messageId);
+	}
+
+	/**
+	 * Display a message in details
+	 */
 	public function displayMessage(){
-		echo "Id = $this->messageId<br>User = $this->username<br>Message = $this->message<br>".
-		     "Date = $this->date<br>Keywords: ";
-		displayArray($this->getKeywordsForPost());
+		echo "Message id = $this->messageId<br>User = $this->username<br>Message = $this->message<br>" .
+		     "Date and time = $this->date<br>Keywords: ";
+		foreach ($this->keywords as $keyword){
+			echo "$keyword ";
+		}
+		echo "<br>Vote sum: " . $this->getVoteSum() . "<br>";
+
 	}
 
 }
