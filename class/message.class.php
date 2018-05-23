@@ -9,23 +9,13 @@
  * Date: 2018-05-19
  ******************************************************************************/
 class Message{
-	// Message id
-	private $messageId;
 
-	// Poster username
-	private $username;
-
-	// The message itself
-	private $message;
-
-	// The date and time for the post
-	private $date;
-
-	// string[] for keywords for the post
-	private $keywords;
-
-	// What the value for voting is
-	private $votes;
+	private $messageId;     // Message id
+	private $username;      // Poster username
+	private $message;       // The message itself
+	private $date;          // The date and time for the post
+	private $keywords;      // string[] for keywords for the post
+	private $votes;         // number of votes for this message
 
 	/**
 	 * Message constructor. Sets data members and gets keywords for post.
@@ -47,7 +37,9 @@ class Message{
 
 		// Asks for keywords for post
 		$this->keywords = DbManager::getPostKeyword($this->messageId);
-		$this->votes = DbManager::getVotes($this->messageId);
+
+		// Asks for amount of votes
+		$this->votes = DbManager::getMessageVotes($this->messageId);
 	}
 
     /**
@@ -93,10 +85,17 @@ class Message{
 		return $this->username;
 	}
 
+	/**
+	 * Display a message in details
+	 */
 	public function displayMessage(){
-		echo "Id = $this->messageId<br>User = $this->username<br>Message = $this->message<br>".
-		     "Date = $this->date<br>Keywords: ";
-		displayArray($this->getKeywordsForPost());
+		echo "Message id = $this->messageId<br>User = $this->username<br>Message = $this->message<br>" .
+		     "Date and time = $this->date<br>Keywords: ";
+		foreach ($this->keywords as $keyword){
+			echo "$keyword ";
+		}
+		echo "<br>Vote sum: " . $this->getVoteSum() . "<br>";
+
 	}
 
 }

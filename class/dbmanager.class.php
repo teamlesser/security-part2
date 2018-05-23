@@ -248,28 +248,6 @@ class DbManager{
 		return $messages;
 	}
 
-	/**
-	 * Get a message by attribute
-	 *
-	 * @param $attribute
-	 *
-	 * @return array
-	 */
-	public static function getMessageByKeyword(string $attribute): array{
-		$messages = self::getAllMessages();
-		$message = [];
-		if (!empty($messages)){
-			foreach ($messages as $array){
-				if (in_array($attribute, $array, true)){
-					$message = $array;
-					break;
-				}
-			}
-		}
-
-		return $message;
-	}
-
 	// Post a keyword
 
 	/**
@@ -470,29 +448,107 @@ class DbManager{
 		}
 	}
 
+	/**
+	 * @param string $username
+	 *
+	 * @return array all messsages by the user
+	 */
+	public static function getMessageByUserName(string $username): array{
+		$messages = self::getAllMessages();
+		$msg = [];
+		foreach ($messages as $message){
+			if ($message->getUsername() === $username){
+				$msg[] = $message;
+			}
+		}
+
+		return $msg;
+	}
 
     /**
-     * Gets the votes for a post.
-     * @param $postId int The id of the message.
-     * @return int The amount of votes.
+     * Gets messages by keyword.
+     * @param string $keyword The keyword of the post.
+     * @return array An array of messages.
      */
-    public static function getVotes($postId){
-        $query = "SELECT SUM(vote.vote)
-        FROM securitylab.vote
-        WHERE message_id = $1; ";
+	public static function getMessagesByKeyword(string $keyword){
+        $query = "SELECT message.id, users.username, message.message, message.date
+            FROM securitylab.message 
+            INNER JOIN securitylab.users ON users.id = message.user_id
+            WHERE message.id IN (SELECT message_id FROM securitylab.keyword WHERE keyword = $1)
+            ORDER BY date DESC;";
+        $param = array($keyword);
 
-        $param = array($postId);
         $db = Database::getInstance();
         $result = $db->doParamQuery($query, $param);
-        $sum = pg_fetch_result($result, 0, 0);
-        pg_free_result($result);
 
-        if ($sum == null){
-            return 0;
+        // Message[]
+        $messages = [];
+
+        while ($row = pg_fetch_row($result)){
+            $messages[] = new Message($row[0], $row[1], $row[2], $row[3]);
         }
 
-        return $sum;
+        pg_free_result($result);
+
+        return $messages;
     }
+
+
+	/**
+	 * Get the number of votes that a message has
+	 *
+	 * @param $messageId
+	 *
+	 * @return int The number of votes or the message or -999 if wrong message id
+	 */
+	public static function getMessageVotes($messageId){
+		$query = "SELECT sum(vote) FROM securitylab.vote v " .
+		         "WHERE v.message_id = $1;";
+
+		$params = array($messageId);
+
+		$count = - 999;
+		$results = Database::getInstance()->doParamQuery($query, $params);
+		if ($results && pg_affected_rows($results) > 0){
+			$count = intval(pg_fetch_result($results, 0, 'sum'));
+			pg_free_result($results);
+		}
+
+		return $count;
+
+	}
+
+	/**
+	 * Get messages sorted by an attribute date|popularity
+	 *
+	 * @return array
+	 */
+	public static function getMessagesSortedByDate(): array{
+
+		$messages = self::getAllMessages();
+
+		usort($messages, function (Message $lhs, Message $rhs){
+			return $lhs->getDate() < $rhs->getDate();
+		});
+
+		return $messages;
+	}
+
+	/**
+	 * Get messages sorted by popularity (number of positive votes)
+	 *
+	 * @return array all messages sorted by number of vote
+	 */
+	public static function getMessagesSortedByVote(): array{
+		$messages = self::getAllMessages();
+
+		// Desc sort
+		usort($messages, function (Message $lhs, Message $rhs){
+			return $lhs->getVotes() < $rhs->getVotes();
+		});
+
+		return $messages;
+	}
 
     /**
      * Checks if user has voted on a post.
