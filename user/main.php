@@ -115,7 +115,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
 <main>
 
     <div id="div-logged-in-as">Logged in as <?php echo $username ?></div>
-
+    <div id="logout-div">
+        <button type="button" id="logout-button">Logga ut</button>
+        <p id="logout-message"></p>
+    </div>
     <br>
 
     <textarea id="textarea-message" name="Message" rows="5" cols="40"

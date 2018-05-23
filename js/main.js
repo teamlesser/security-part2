@@ -26,6 +26,7 @@ function main(){
 
     //Adds EventListeners to post message button.
     byId("button-post-message").addEventListener('click', doPostMessage, false);
+    byId("logout-button").addEventListener('click', doLogout, false);
     changeImages();
     // Creates matching XMLHttpRequest-object
     try {
@@ -93,25 +94,7 @@ function doPostMessage() {
     }
 }
 
-/**
- * Change the image on hover
- */
-function changeImages() {
-    var downVotes = document.getElementsByClassName("downvote");
-    var upVotes = document.getElementsByClassName("upvote");
 
-    for (var i = 0; i < downVotes.length; i++) {
-        downVotes[i].addEventListener("mouseover", function () {
-            this.src = "../img/downvote_hover.png";
-        }, false);
-    }
-    for (var i = 0; i < upVotes.length; i++) {
-        upVotes[i].addEventListener("mouseover", function () {
-            this.src = "../img/upvote_hover.png";
-        }, false);
-    }
-
-}
 /**
  * Processes the received response from the
  * server when attempting to login.
@@ -146,6 +129,39 @@ function processPostMessage(){
         }
     }
 }
+
+/*******************************************************************************
+ * doLogout()
+ * sends a GET to logout.php
+ ******************************************************************************/
+function doLogout() {
+    // EventListener for server state change
+    xhr.addEventListener('readystatechange', processLogout, false);
+    xhr.open('GET', 'logout.php', true);
+    xhr.send(null);
+}
+
+/*******************************************************************************
+ * processLogout()
+ * recieces response from server after trying to log out
+ ******************************************************************************/
+function processLogout() {
+
+    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+        // Removes the EventListener since the xhr-object is reused
+        xhr.removeEventListener('readystatechange', processLogout, false);
+        var response = JSON.parse(this.responseText);
+
+        byId('logout-message').style.display = "block";
+        byId('logout-message').innerHTML = response.message;
+
+        //redirect if return message doesn't imply that something went wrong
+        if(response.message.indexOf("wrong") === -1){
+            window.location.replace("/securitylab/index.php");
+        }
+    }
+}
+
 
 //Main is run once the page has finished loading.
 window.addEventListener("load", main, false);
