@@ -189,6 +189,11 @@ font, center, s, u, b, i {
     background-size: 50px 50px;
 }
 
+.message-result{
+    text-align: center;
+    font-weight: bold;
+}
+
 /*--------- REGISTRATION ------------*/
 
 #loginForm input {
