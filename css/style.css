@@ -24,6 +24,18 @@ html {
     margin-bottom: 50px;
 }
 
+#logout-div{
+    min-width: 100px;
+    text-align: center;
+    margin-top: 10px;
+}
+
+#logout-message{
+    display: none;
+    color: #FF0000;
+    font-weight: bold;
+}
+
 #login-button, #register-button {
     background: darkorange;
     display: block;
