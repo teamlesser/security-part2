@@ -15,7 +15,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forgot password</title>
-    <script src="js/forgotpassword.js"></script> 
+    <script src="js/forgotPassword.js"></script> 
 </head>
 <body>
 

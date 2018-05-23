@@ -50,7 +50,7 @@ function doResetPassword() {
 			"resettoken": byId('resettoken-field').value 
 		});
         xhr.addEventListener('readystatechange', processResetPassword, false);
-        xhr.open('POST', 'user/resetpassword.php', true);
+        xhr.open('POST', 'user/processResetPassword.php', true);
         xhr.setRequestHeader("Content-type", "application/json");
         xhr.send(data);
     }else{

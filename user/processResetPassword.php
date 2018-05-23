@@ -1,6 +1,6 @@
 <?php
 /*******************************************************************************
- * File: resetpassword.php
+ * File: processResetPassword.php
  *
  * Desc: Tries to reset the password for the user in exchange of the correct resetToken
  *
@@ -12,7 +12,6 @@ $response = array(
 	"status"  => false,
 	"message" => "error",
 );
-
 
 /**
  * Gets the user id from the users table based on an email address
@@ -40,25 +39,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
 	$newpass2 = $data{"newpass2"};
 	$resetToken = $data{"token"};
 
+	// Checks that e-mail has correct format
+	$emailRegex = "/[\w]+@[\w]+\.[a-zA-Z]+/";		
 	if ($newpass1 != $newpass2){ // Check if the passwords match
 
 		$response["message"] = $noMatchMessage;
+	
+	}else if (!preg_match($emailRegex, $email)){ // Check if the email entered is valid
 
-	}elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)){ // Check if the email entered is valid
-
-		$response["message"] = $noMatchMessage;
-
-	}elseif (!emailExist($email)){ // Check if the email exists
-
-		$response["message"] = $noMatchMessage;
+		$response["message"] = "The email entered is in wrong format";
 
 	}else{
 
 		$userid = getUserID($email);
 		if ($userid > 0){
 
-			if (!DbManager::resetTokenIDMatch($userid, $resetToken)){ // Check if the reset token matches
-				// the email
+			if (!DbManager::resetTokenIDMatch($userid, $resetToken)){ // Check if the reset token matches the email
 
 				$response["message"] = "The email and token you entered does not match.";
 
@@ -66,14 +62,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
 
 				if (DbManager::changePassword($email, $newpass1)){ // Attempt to change the email
 
-					$response["message"]
-						= "Your password was changed. A confirmation mail should have been sent to your email.";
+					$response["message"] = "Your password was changed. A confirmation mail should have been sent to your email.";
 					$response["success"] = true;
 					$mailer->sendResetPasswordConfirmationEmail($email); // Send an confirmation email
 
 				}else{
-					$response["message"]
-						= "Your password could not be changed. Please contact customer service.";
+					$response["message"] = "Your password could not be changed. Please contact customer service.";
 				}
 			}
 

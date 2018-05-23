@@ -43,7 +43,7 @@ function doForgotPassword() {
         
         var data = JSON.stringify({"email": byId('email-field').value});
         xhr.addEventListener('readystatechange', processForgotPassword, false);
-        xhr.open('POST', 'user/forgotpassword.php', true);
+        xhr.open('POST', 'user/processForgotPassword.php', true);
         xhr.setRequestHeader("Content-type", "application/json");
         xhr.send(data);
         
