@@ -94,25 +94,7 @@ function doPostMessage() {
     }
 }
 
-/**
- * Change the image on hover
- */
-function changeImages() {
-    var downVotes = document.getElementsByClassName("downvote");
-    var upVotes = document.getElementsByClassName("upvote");
 
-    for (var i = 0; i < downVotes.length; i++) {
-        downVotes[i].addEventListener("mouseover", function () {
-            this.src = "../img/downvote_hover.png";
-        }, false);
-    }
-    for (var i = 0; i < upVotes.length; i++) {
-        upVotes[i].addEventListener("mouseover", function () {
-            this.src = "../img/upvote_hover.png";
-        }, false);
-    }
-
-}
 /**
  * Processes the received response from the
  * server when attempting to login.
