@@ -41,7 +41,7 @@ $title = "Security Lab - Group Four | Home page";
         <br>
         <a href="user/register.php">New user?</a>
         <br>
-        <a href="user/resetpassword.php">Forgot password?</a>
+        <a href="resetpassword.php">Forgot password?</a>
     </div>
     <div id="return-message"></div>
 

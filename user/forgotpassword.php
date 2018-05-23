@@ -123,11 +123,11 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 			$userid = getUserID($email); // Make sure the user exists
 			if($userid > 0) {
 			
-				if(resetTokenExist($userid) { // Make sure the user does not have a reset token already
+				if(resetTokenExist($userid)){ // Make sure the user does not have a reset token already
 					
 					$response["message"] = "An email with a reset link has already been sent to your email.";
 					
-				} else {
+				}else {
 					
 					// Generate a token
 					$resetToken = bin2hex(random_bytes(32));
