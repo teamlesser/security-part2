@@ -176,8 +176,6 @@ class DbManager{
 				}
 			}
 		}
-
-
 		return $detailsFromAttribute;
 	}
 	// =================================================================
@@ -449,6 +447,7 @@ class DbManager{
 	}
 
 	/**
+<<<<<<< HEAD
 	 * @param string $username
 	 *
 	 * @return array all messsages by the user
@@ -463,6 +462,52 @@ class DbManager{
 		}
 
 		return $msg;
+	}
+
+	/**
+	* Check if the user already have a reset token in his/her data
+	* @var $userid The userid to check in the reset table
+	* @returns boolean True if the reset token exists, otherwise false
+	*/
+	public static function resetTokenExist($userid) : bool {
+		
+		$query = "SELECT reset_token FROM securitylab.reset WHERE user_id = $1 AND reset_token IS NOT NULL";
+		$param = array($userid);
+
+		// Result only returns a boolean
+		$db = Database::getInstance();
+		$result = $db->doParamQuery($query, $param);
+		
+		// Check if an resetToken exists
+		if ($result == null || $result == "f"){
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	/**
+	* Makes an attempt to add a reset token to the users table
+	* @var $email The email to check in the users table
+	* @var $resetToken The reset token
+	* @returns boolean True if the reset token was added successfully, otherwise false
+	*/
+	public static function addResetToken($userid, $resetToken) : bool {
+		
+		$date = date('Y-m-d H:i:s');
+		$query = "UPDATE securitylab.reset SET reset_token = $1, reset_token_inserted_time = $2 WHERE user_id = $3";
+		$param = array($resetToken, $date, $userid);
+
+		// Result only returns a boolean
+		$db = Database::getInstance();
+		$result = $db->doParamQuery($query, $param);
+
+		// "t" is true, "f" is false
+		if ($result == null || $result == "f") {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
     /**
