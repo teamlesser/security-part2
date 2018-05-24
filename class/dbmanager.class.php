@@ -24,430 +24,463 @@ class DbManager{
 	public function __construct(){
 	}
 
+    // *****************************************************************************
+    // REGISTER
+    // *****************************************************************************
 
-	/**
-	 * Add a user to the database.
-	 *
-	 * @param string $username User's username
-	 * @param string $password User's password
-	 * @param string $email    User's email
-	 *
-	 * If any of the params is empty, this function returns "Registration refused!"
-	 *
-	 * @return string Registration successful/refused
-	 */
-	public static function addUser(string $username, string $password, string $email): string{
-		// if any of username, password and email is empty, do no proceed
-		if (!empty($username) && !empty($password) && isValidEmail($email)){
-			$users = self::getAllUsers();
+    /**
+     * Add a user to the database.
+     *
+     * @param string $username User's username
+     * @param string $password User's password
+     * @param string $email    User's email
+     *
+     * If any of the params is empty, this function returns "Registration refused!"
+     *
+     * @return string Registration successful/refused
+     */
+    public static function addUser(string $username, string $password, string $email): string{
+        // if any of username, password and email is empty, do no proceed
+        if (!empty($username) && !empty($password) && isValidEmail($email)){
 
-			if (self::isUnique($username, $users)){ // is unique user, proceed
-				$query = "INSERT INTO securitylab.users (username, password, email)" .
-				         "VALUES ($1, $2, $3)";
+            // Are the username and email unique?
+            if (self::isUniqueUsername($username)){
 
-				$params = array($username, $password, $email);
+                if (self::isUniqueEmail($email)){
+                    $query = "INSERT INTO securitylab.users (username, password, email)" .
+                        "VALUES ($1, $2, $3)";
 
-				$results = Database::getInstance()->doParamQuery($query, $params);
+                    $params = array($username, $password, $email);
+                    $results = Database::getInstance()->doParamQuery($query, $params);
+
+                    if ($results && pg_affected_rows($results) > 0){ // table row has been altered
+                        pg_free_result($results);
+
+                        $token = self::createVerificationToken();
+
+                        // Insert token into table
+                        if ($token && self::insertVerificationTokenForUser($username, $token)){
+
+                            // Send registration e-mail with verification token
+                            try {
+                                $mailer = new Mailer();
+                                $mailer->sendRegistrationEmail($email, $token);
+                            }
+                            catch(PHPMailer\PHPMailer\Exception $e){
+                                return "Could not send verification e-mail.";
+                            }
+
+                            return "Registration successful";
+                        }
+
+                        return "Could not create verification token. Contact admin.";
+                    }
+
+                }else{ // email is not unique
+                    return "Registration refused!";
+
+                }
+            }else{// user is already in the database
+                return "Registration refused!";
+
+            }
+        }else{// a field is empty
+            return "Registration refused!";
+        }
+    }
+
+    /**
+     * Check if a username is unique.
+     *
+     * @param $username string Username of the user to check existence of
+     * @return bool true if unique (returned value is empty) else false
+     */
+    private static function isUniqueUsername(string $username): bool{
+        $query = "SELECT EXISTS(SELECT * FROM securitylab.users WHERE username = $1)";
+        $param = array($username);
+
+        $result = Database::getInstance()->doParamQuery($query, $param);
+
+        if ($result){
+            $row = pg_fetch_row($result);
+            pg_free_result($result);
+
+            $bool = $row[0];
+
+            return $bool == "f";
+        }
+
+        return false;
+    }
+
+    /**
+     * Is the email unique?
+     * @param string $email User e-mail.
+     * @return bool Is the e-mail supplied unique? (Does not exist in database.)
+     */
+    private static function isUniqueEmail(string $email): bool{
+        $query = "SELECT EXISTS(SELECT * FROM securitylab.users WHERE email = $1)";
+        $param = array($email);
+
+        $result = Database::getInstance()->doParamQuery($query, $param);
+
+        if ($result){
+            $row = pg_fetch_row($result);
+            pg_free_result($result);
+
+            $bool = $row[0];
+
+            return $bool == "f";
+        }
+
+        return false;
+    }
+
+    // *****************************************************************************
+    // VERIFY
+    // *****************************************************************************
+
+    /**
+     * Inserts a verification token for a user in a table.
+     * @param $username string username of the user
+     * @param $token string The token to be entered
+     * @return bool If the value could be inserted.
+     */
+    private static function insertVerificationTokenForUser($username, $token){
+        $query = "INSERT INTO securitylab.verify (user_id, verify_token)
+            VALUES ((SELECT id FROM securitylab.users WHERE username = $1), $2);";
+
+        $params = array($username, $token);
+        $result = Database::getInstance()->doParamQuery($query, $params);
+
+        if (pg_affected_rows($result) == 1){
+            pg_free_result($result);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Generates a verification token.
+     * @return bool|string If everything went fine, a verification token, otherwise false.
+     */
+    private static function createVerificationToken(){
+
+        try{
+            $verificationToken = bin2hex(random_bytes(32));
+            return $verificationToken;
+        }
+        catch(Exception $e){
+            return false;
+        }
+    }
 
 
-				if ($results && pg_affected_rows($results) > 0){ // table row has been altered
-					freeResource($results);
+    /**
+     * Returns the user id for a verification token if it exist. If not, false.
+     * @param $token string Token to check for.
+     * @return int|bool User id or false.
+     */
+    public static function getUserIdForVerificationToken($token){
+        $query = "SELECT user_id FROM securitylab.verify WHERE verify_token = $1;";
+        $param = array($token);
 
-					return "Registration successful";
+        $result = Database::getInstance()->doParamQuery($query, $param);
 
-				}else{ // no table row altered
-					return "Registration refused!";
+        if ($result){
+            $userId = pg_fetch_row($result)[0];
+            pg_free_result($result);
 
-				}
-			}else{// user is already in the database
-				return "Registration refused!";
+            return $userId;
+        }
 
-			}
-		}else{// a field is empty
-			return "Registration refused!";
-		}
-	}
+        return false;
+    }
 
-	/**
-	 * Check if a value is unique.
-	 * This function is intended to serve as generic function to check for uniqueness using an
-	 * identifier against a pg_fetch_all results
-	 *
-	 * @see http://php.net/manual/en/function.in-array.php#106319
-	 *
-	 * @param string $item      item to search
-	 * @param array  $container container containing all items
-	 *
-	 * @return bool true if unique else false
-	 */
-	private static function isUnique(string $item, array $container): bool{
-		if (!empty($container)){
-			foreach ($container as $array){
-				if (in_array($item, $array, true)){
-					return false;
-				}
-			}
-		}
+    /**
+     * Verifies an user by setting boolean to true in users-table
+     * and removing verify-entry.
+     * @param $userId int Id of user.
+     * @return bool If the user could be verified.
+     */
+    public static function verifyUser($userId){
+        $query = "UPDATE securitylab.users SET verified = TRUE WHERE id = $1";
+        $param = array($userId);
 
-		return true;
-	}
+        $result = Database::getInstance()->doParamQuery($query, $param);
 
-	/**
-	 * Determine that a username exits in the database
-	 *
-	 * @param string $username
-	 *
-	 * @return bool
-	 */
-	public static function userExists(string $attribute): bool{
-		$all = self::getAllUsers();
+        if (pg_affected_rows($result) == 1){
 
-		return !self::isUnique($attribute, $all);
-	}
+            pg_free_result($result);
 
-	/**
-	 * Fetch all users in the database
-	 *
-	 * @return array All the users in the database and their details
-	 */
-	public static function getAllUsers(): array{
-		$query = "SELECT * FROM securitylab.users;";
-		$results = Database::getInstance()->doSimpleQuery($query);
+            // Remove verify entry in verify-table
+            $query = "DELETE FROM securitylab.verify WHERE user_id = $1;";
+            $result = Database::getInstance()->doParamQuery($query, $param);
 
-		$users = [];
-		if (!is_null($results) && pg_affected_rows($results) > 0){
-			while ($user = pg_fetch_row($results)){
-				$users [] = new User($user[0], $user[1], $user[2], $user[3], $user[4]);
-			}
-		}
-		freeResource($results);
+            // Entry was deleted
+            if (pg_affected_rows($result) == 1){
+                pg_free_result($result);
+                return true;
+            }
+        }
 
-		return $users;
-	}
+        return false;
+    }
 
-	/**
-	 * Get the details of a particular user from the users table
-	 *
-	 * @param string $username The username of the user of interest
-	 *
-	 * @return array an associative array with the user's details or null if no user exists
-	 */
-	public static function getUser(string $username): array{
-		if (!empty($username)){
-			$query = "SELECT * FROM securitylab.users u WHERE u.username = $1";
-			$params = array($username);
 
-			$results = Database::getInstance()->doParamQuery($query, $params);
+    /**
+     * Checks if a user is verified. Used when logging in.
+     * @param $email string Email of the user.
+     * @return bool Whether or not they are verified/exist.
+     */
+    public static function isUserVerified($email){
+        $query = "SELECT EXISTS (SELECT * FROM securitylab.users WHERE email = $1 AND verified = true);";
+        $param = array($email);
 
-			$userDetails = [];
+        $result = Database::getInstance()->doParamQuery($query, $param);
 
-			if ($results != null && pg_affected_rows($results) > 0){
-				$userDetails = pg_fetch_assoc($results);
-			}
-		}
-		freeResource($results);
+        if ($result){
+            $row = pg_fetch_row($result);
+            pg_free_result($result);
 
-		return $userDetails;
-	}
+            $bool = $row[0];
 
-	/**
-	 * Get a user by an attribute from the securitylab.users table
-	 *
-	 * @param string $attribute username|email|password|id|status
-	 *
-	 * @return array returns an array with the user's details [id, username, password, email,
-	 * status]
-	 */
-	public static function getUserByAttribute(string $attribute): array{
-		$query = "SELECT * FROM securitylab.users;";
-		$results = Database::getInstance()->doSimpleQuery($query);
-		$container = [];
-		if (!is_null($results) && pg_affected_rows($results) > 0){
-			$container = pg_fetch_all($results);
-		}
-		freeResource($results);
-		$detailsFromAttribute = [];
+            return $bool == "t";
+        }
 
-		if (!empty($container)){
-			foreach ($container as $array){
-				if (in_array($attribute, $array, true)){
-					$detailsFromAttribute = $array;
-					break;
-				}
-			}
-		}
-		return $detailsFromAttribute;
-	}
-	// =================================================================
-	//          UPDATE MESSAGE TABLE
-	// =================================================================
-	/**
-	 * Posts a message to the database.
-	 *
-	 * @param $username string Username of the poster.
-	 * @param $message  string Message that the user posted.
-	 *
-	 * @return int|null If the message could be posted an int is returned.
-	 */
-	public static function postMessage(string $username, string $message){
-		$query = "INSERT INTO securitylab.message (user_id, message) " .
-		         "VALUES ((SELECT id FROM securitylab.users u WHERE u.username = $1),$2);";
+        return false;
+    }
 
-		$param = array($username, $message);
 
-		$db = Database::getInstance();
-		$result = $db->doParamQuery($query, $param);
+    // *****************************************************************************
+    // USERS
+    // *****************************************************************************
 
-		if ($result && pg_affected_rows($result) > 0){
-			freeResource($result);
+    /**
+     * Fetch all users in the database
+     *
+     * @return array All the users in the database and their details
+     */
+    public static function getAllUsers(): array{
+        $query = "SELECT * FROM securitylab.users;";
+        $results = Database::getInstance()->doSimpleQuery($query);
 
-			// Check the id of the most recent post for this user and return it
-			$query = "SELECT id FROM securitylab.message " .
-			         "WHERE user_id = (SELECT id FROM securitylab.users u WHERE u.username = $1) " .
-			         "GROUP BY id " .
-			         "ORDER BY max(date) DESC;";
+        $users = [];
+        if (!is_null($results) && pg_affected_rows($results) > 0){
+            while ($user = pg_fetch_row($results)){
+                $users [] = new User($user[0], $user[1], $user[2], $user[3], $user[4]);
+            }
+        }
+        pg_free_result($results);
 
-			$param = array($username);
-			$result = $db->doParamQuery($query, $param);
+        return $users;
+    }
 
-			// Get the topmost entry and return value
-			$postId = pg_fetch_result($result, 0, 0);
-			freeResource($result);
+    /**
+     * Get the details of a particular user from the users table
+     *
+     * @param string $username The username of the user of interest
+     *
+     * @return array an associative array with the user's details or null if no user exists
+     */
+    public static function getUser(string $username): array{
+        $userDetails = [];
 
-			return $postId;
-		}
+        if (!empty($username)){
+            $query = "SELECT * FROM securitylab.users u WHERE u.username = $1";
+            $params = array($username);
 
-		return null;
-	}
+            $results = Database::getInstance()->doParamQuery($query, $params);
 
-	/**
-	 * Get all messages in the database
-	 *
-	 * @return array an array with all the messages and their attributes from the database
-	 */
-	public static function getAllMessages(){
-		$messages = [];
+            if ($results != null && pg_affected_rows($results) > 0){
+                $userDetails = pg_fetch_assoc($results);
+                pg_free_result($results);
+            }
+        }
 
-		$query
-			= "SELECT message.id, users.username, message.message, message.date FROM securitylab.message
+        return $userDetails;
+    }
+
+    /**
+     * Get a user by an attribute from the securitylab.users table
+     *
+     * @param string $attribute username|email|password|id|status
+     *
+     * @return array returns an array with the user's details [id, username, password, email,
+     * status]
+     */
+    public static function getUserByAttribute(string $attribute): array{
+        $query = "SELECT * FROM securitylab.users;";
+        $results = Database::getInstance()->doSimpleQuery($query);
+        $container = [];
+        if (!is_null($results) && pg_affected_rows($results) > 0){
+            $container = pg_fetch_all($results);
+        }
+        pg_free_result($results);
+        $detailsFromAttribute = [];
+
+        if (!empty($container)){
+            foreach ($container as $array){
+                if (in_array($attribute, $array, true)){
+                    $detailsFromAttribute = $array;
+                    break;
+                }
+            }
+        }
+
+
+        return $detailsFromAttribute;
+    }
+
+    /**
+     * Checks if an e-mail exists in the database and returns a bool.
+     * @param $email string The e-mail to search for.
+     * @return bool If the email exists in the database.
+     */
+    public static function emailExist($email): bool {
+
+        $query = "SELECT EXISTS (SELECT * FROM securitylab.users WHERE email = $1);";
+        $param = array($email);
+
+        // Result only returns a boolean
+        $result = Database::getInstance()->doParamQuery($query, $param);
+
+        // "t" is true, "f" is false
+        if ($result == null || $result == "f"){
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * Gets user id for e-mail.
+     * @param $id string The user email
+     * @return string|bool User e-mail or bool
+     */
+    public static function getEmailByUserId($id){
+        $query = "SELECT email FROM securitylab.users WHERE id = $1;";
+        $param = array($id);
+
+        $result = Database::getInstance()->doParamQuery($query, $param);
+
+        if ($result){
+            $row = pg_fetch_assoc($result);
+            pg_free_result($result);
+
+            return $row["email"];
+        }
+
+        return false;
+    }
+
+    // =================================================================
+    //          UPDATE MESSAGE TABLE
+    // =================================================================
+    /**
+     * Posts a message to the database.
+     *
+     * @param $username string Username of the poster.
+     * @param $message  string Message that the user posted.
+     *
+     * @return int|null If the message could be posted an int is returned.
+     */
+    public static function postMessage(string $username, string $message){
+        $query = "INSERT INTO securitylab.message (user_id, message) " .
+            "VALUES ((SELECT id FROM securitylab.users u WHERE u.username = $1),$2);";
+
+        $param = array($username, $message);
+
+        $db = Database::getInstance();
+        $result = $db->doParamQuery($query, $param);
+
+        if ($result && pg_affected_rows($result) > 0){
+            pg_free_result($result);
+
+            // Check the id of the most recent post for this user and return it
+            $query = "SELECT id FROM securitylab.message " .
+                "WHERE user_id = (SELECT id FROM securitylab.users u WHERE u.username = $1) " .
+                "GROUP BY id " .
+                "ORDER BY max(date) DESC;";
+
+            $param = array($username);
+            $result = $db->doParamQuery($query, $param);
+
+            // Get the topmost entry and return value
+            $postId = pg_fetch_result($result, 0, 0);
+            pg_free_result($result);
+
+            return $postId;
+        }
+
+        return null;
+    }
+
+    // *****************************************************************************
+    // GETTING MESSAGES
+    // *****************************************************************************
+
+    /**
+     * Get all messages in the database
+     *
+     * @return array an array with all the messages and their attributes from the database
+     */
+    public static function getAllMessages(){
+        $messages = [];
+
+        $query
+            = "SELECT message.id, users.username, message.message, message.date FROM securitylab.message
           INNER JOIN securitylab.users ON users.id = message.user_id
           ORDER BY date DESC;";
 
-		// Gets all posts and usernames for them
-		$db = Database::getInstance();
-		$result = $db->doSimpleQuery($query);
+        // Gets all posts and usernames for them
+        $db = Database::getInstance();
+        $result = $db->doSimpleQuery($query);
 
-		while ($row = pg_fetch_row($result)){
-			$messages[] = new Message($row[0], $row[1], $row[2], $row[3]);
-		}
+        while ($row = pg_fetch_row($result)){
+            $messages[] = new Message($row[0], $row[1], $row[2], $row[3]);
+        }
 
-		pg_free_result($result);
+        pg_free_result($result);
 
-		return $messages;
-	}
-
-	// Post a keyword
-
-	/**
-	 * Posts a keyword to a specific post.
-	 *
-	 * @param $postId int Id of the post.
-	 */
-	public static function postKeyword($postId, $keyword): void{
-		$query = "INSERT INTO securitylab.keyword (message_id, keyword) VALUES ($1,$2);";
-		$param = array($postId, $keyword);
-		$results = Database::getInstance()->doParamQuery($query, $param);
-		freeResource($results);
-	}
+        return $messages;
+    }
 
 
-	/**
-	 * Get all the keywords for a particular post
-	 *
-	 * @param int $msgId The id of the message
-	 *
-	 * @return array array containing the keywords
-	 */
-	public static function getPostKeyword(int $msgId){
-		// Array of strings
-		$keywords = [];
+    /**
+     * Gets a message by id.
+     *
+     * @param $postId int Id of the message.
+     *
+     * @return Message|null A message object.
+     */
+    public static function getMessageById($postId){
 
-		$query = "SELECT keyword.keyword FROM securitylab.keyword WHERE message_id = $1;";
-		$param = array($msgId);
-
-		$result = Database::getInstance()->doParamQuery($query, $param);
-
-		if ($result && pg_affected_rows($result) > 0){
-
-			while ($row = pg_fetch_row($result)){
-				$keywords[] = $row[0];
-			}
-
-			freeResource($result);
-		}
-
-		return $keywords;
-	}
-
-
-	/**
-	 * Checks that the message exists and is owned by the user.
-	 *
-	 * @param $username string Username of the user.
-	 * @param $postId   int Post id.
-	 *
-	 * @return bool If the post is owned by the user and both exist.
-	 */
-	public static function messageExistsAndIsOwnedByUser($username, $postId): bool{
-		$query
-			= "SELECT EXISTS (
-        SELECT * FROM securitylab.users 
-        INNER JOIN securitylab.message ON message.user_id = users.id 
-        WHERE username = $1 AND message.id = $2);";
-
-		$param = array($username, $postId);
-
-		// Result only returns a boolean
-		$db = Database::getInstance();
-		$result = $db->doParamQuery($query, $param);
-		$bool = pg_fetch_result($result, 0, 0);
-		pg_free_result($result);
-
-		// "t" is true, "f" is false
-		if ($bool == null || $bool == "f"){
-			return false;
-		}else{
-			return true;
-		}
-	}
-
-	/**
-	 * Gets a message by id.
-	 *
-	 * @param $postId int Id of the message.
-	 *
-	 * @return Message|null A message object.
-	 */
-	public static function getMessageById($postId){
-
-		$query
-			= "SELECT message.id, users.username, message.message, message.date FROM securitylab.message
+        $query
+            = "SELECT message.id, users.username, message.message, message.date FROM securitylab.message
         INNER JOIN securitylab.users ON users.id = message.user_id
         WHERE message.id = $1;";
 
-		$param = array($postId);
+        $param = array($postId);
 
-		// Result only returns a boolean
-		$db = Database::getInstance();
-		$result = $db->doParamQuery($query, $param);
+        // Result only returns a boolean
+        $db = Database::getInstance();
+        $result = $db->doParamQuery($query, $param);
 
-		if ($result){
-			$msgData = pg_fetch_row($result, 0);
-			pg_free_result($result);
-			$message = new Message($msgData[0], $msgData[1], $msgData[2], $msgData[3]);
+        if ($result){
+            $msgData = pg_fetch_row($result, 0);
+            pg_free_result($result);
+            $message = new Message($msgData[0], $msgData[1], $msgData[2], $msgData[3]);
 
-			return $message;
-		}
+            return $message;
+        }
 
-		return null;
-	}
-
-	/**
-	 * Deletes a post from the database by id.
-	 *
-	 * @param $postId int Id of the post
-	 *
-	 * @return bool If the post could be deleted.
-	 */
-	public static function deletePost($postId){
-		$query = "DELETE FROM securitylab.message WHERE message.id = $1;";
-
-		$param = array($postId);
-		$db = Database::getInstance();
-		$result = $db->doParamQuery($query, $param);
-
-		$countDeleted = pg_affected_rows($result);
-		pg_free_result($result);
-
-		if ($countDeleted == 1){
-			return true;
-		}
-
-		return false;
-	}
+        return null;
+    }
 
 
-	/**
-	 * Delets a reset token from a reset table
-	 *
-	 * @var $email The email to check in the users table
-	 *
-	 */
-	public static function deleteResetToken($userid): void{
-
-		$query
-			= "UPDATE securitylab.reset SET reset_token = NULL, reset_token_inserted_time = NULL WHERE user_id = $1";
-		$param = array($userid);
-
-		// Result does not really need to return anything
-		$db = Database::getInstance();
-		$db->doParamQuery($query, $param);
-	}
-
-	/**
-	 * Makes an attempt to change a users password
-	 *
-	 * @var $email       The email to check in the users table
-	 * @var $newPassword The new password to change to
-	 * @returns boolean True if password was changed, otherwise false
-	 */
-	public static function changePassword($email, $newPassword): bool{
-
-		$query = "UPDATE securitylab.users SET password = $1 WHERE email = $2";
-		$param = array($newPassword, $email);
-
-		// Result only returns a boolean
-		$db = Database::getInstance();
-		$result = $db->doParamQuery($query, $param);
-
-		// "t" is true, "f" is false
-		if ($result == null || $result == "f"){
-			return false;
-		}else{
-			DbManager::deleteResetToken($email);
-
-			return true;
-		}
-	}
-
-	/**
-	 * Check if the email entered matches with the users reset token
-	 *
-	 * @var $email      The email to check in the users table
-	 * @var $resetToken The reset token
-	 * @returns boolean True if the reset token exists in the row of the user, based on his/her
-	 *          email
-	 */
-	public static function resetTokenIDMatch($userid, $resetToken): bool{
-
-		$query
-			= "SELECT COUNT(*) FROM securitylab.reset WHERE user_id = $1 AND reset_token = $2 IS NOT NULL";
-		$param = array($userid, $resetToken);
-
-		// Result only returns a boolean
-		$db = Database::getInstance();
-		$result = $db->doParamQuery($query, $param);
-
-		// Check if there was a match
-		if ($result > 0){
-			return true;
-		}else{
-			return false;
-		}
-	}
-
-	/**
-<<<<<<< HEAD
+    /**
 	 * @param string $username
 	 *
 	 * @return array all messsages by the user
@@ -462,52 +495,6 @@ class DbManager{
 		}
 
 		return $msg;
-	}
-
-	/**
-	* Check if the user already have a reset token in his/her data
-	* @var $userid The userid to check in the reset table
-	* @returns boolean True if the reset token exists, otherwise false
-	*/
-	public static function resetTokenExist($userid) : bool {
-		
-		$query = "SELECT reset_token FROM securitylab.reset WHERE user_id = $1 AND reset_token IS NOT NULL";
-		$param = array($userid);
-
-		// Result only returns a boolean
-		$db = Database::getInstance();
-		$result = $db->doParamQuery($query, $param);
-		
-		// Check if an resetToken exists
-		if ($result == null || $result == "f"){
-			return false;
-		} else {
-			return true;
-		}
-	}
-
-	/**
-	* Makes an attempt to add a reset token to the users table
-	* @var $email The email to check in the users table
-	* @var $resetToken The reset token
-	* @returns boolean True if the reset token was added successfully, otherwise false
-	*/
-	public static function addResetToken($userid, $resetToken) : bool {
-		
-		$date = date('Y-m-d H:i:s');
-		$query = "UPDATE securitylab.reset SET reset_token = $1, reset_token_inserted_time = $2 WHERE user_id = $3";
-		$param = array($resetToken, $date, $userid);
-
-		// Result only returns a boolean
-		$db = Database::getInstance();
-		$result = $db->doParamQuery($query, $param);
-
-		// "t" is true, "f" is false
-		if ($result == null || $result == "f") {
-			return false;
-		} else {
-			return true;
-		}
 	}
 
     /**
@@ -595,6 +582,114 @@ class DbManager{
 		return $messages;
 	}
 
+    // *****************************************************************************
+    // DELETE MESSAGE
+    // *****************************************************************************
+
+    /**
+     * Deletes a post from the database by id.
+     *
+     * @param $postId int Id of the post
+     *
+     * @return bool If the post could be deleted.
+     */
+    public static function deletePost($postId){
+        $query = "DELETE FROM securitylab.message WHERE message.id = $1;";
+
+        $param = array($postId);
+        $db = Database::getInstance();
+        $result = $db->doParamQuery($query, $param);
+
+        $countDeleted = pg_affected_rows($result);
+        pg_free_result($result);
+
+        if ($countDeleted == 1){
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks that the message exists and is owned by the user.
+     *
+     * @param $username string Username of the user.
+     * @param $postId   int Post id.
+     *
+     * @return bool If the post is owned by the user and both exist.
+     */
+    public static function messageExistsAndIsOwnedByUser($username, $postId): bool{
+        $query
+            = "SELECT EXISTS (
+        SELECT * FROM securitylab.users 
+        INNER JOIN securitylab.message ON message.user_id = users.id 
+        WHERE username = $1 AND message.id = $2);";
+
+        $param = array($username, $postId);
+
+        // Result only returns a boolean
+        $db = Database::getInstance();
+        $result = $db->doParamQuery($query, $param);
+        $bool = pg_fetch_result($result, 0, 0);
+        pg_free_result($result);
+
+        // "t" is true, "f" is false
+        if ($bool == null || $bool == "f"){
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+    // *****************************************************************************
+    // KEYWORDS
+    // *****************************************************************************
+
+    /**
+     * Posts a keyword to a specific post.
+     *
+     * @param $postId int Id of the post.
+     */
+    public static function postKeyword($postId, $keyword): void{
+        $query = "INSERT INTO securitylab.keyword (message_id, keyword) VALUES ($1,$2);";
+        $param = array($postId, $keyword);
+        $results = Database::getInstance()->doParamQuery($query, $param);
+        pg_free_result($results);
+    }
+
+
+    /**
+     * Get all the keywords for a particular post
+     *
+     * @param int $msgId The id of the message
+     *
+     * @return array array containing the keywords
+     */
+    public static function getPostKeyword(int $msgId){
+        // Array of strings
+        $keywords = [];
+
+        $query = "SELECT keyword.keyword FROM securitylab.keyword WHERE message_id = $1;";
+        $param = array($msgId);
+
+        $result = Database::getInstance()->doParamQuery($query, $param);
+
+        if ($result && pg_affected_rows($result) > 0){
+
+            while ($row = pg_fetch_row($result)){
+                $keywords[] = $row[0];
+            }
+
+            pg_free_result($result);
+        }
+
+        return $keywords;
+    }
+
+    // *****************************************************************************
+    // VOTING
+    // *****************************************************************************
+
     /**
      * Checks if user has voted on a post.
      * @param $username string Username
@@ -668,4 +763,125 @@ class DbManager{
         return false;
     }
 
+    // *****************************************************************************
+    // RESET PASSWORD
+    // *****************************************************************************
+
+    /**
+     * Makes an attempt to add a reset token to the users table
+     * @var $email string The email to check in the users table
+     * @var $resetToken string The reset token
+     * @returns boolean True if the reset token was added successfully, otherwise false
+     */
+    public static function addResetToken($email, $resetToken) : bool {
+
+        $query = "INSERT INTO securitylab.reset(user_id, reset_token) 
+              VALUES ((SELECT id FROM securitylab.users WHERE email = $1), $2);";
+        $param = array($email, $resetToken);
+
+        // Result only returns a boolean
+        $result = Database::getInstance()->doParamQuery($query, $param);
+
+        if ($result){
+            $affectedRows = pg_affected_rows($result);
+            pg_free_result($result);
+
+            return $affectedRows == 1;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if the user already have a reset token in his/her data
+     * @var $email string The email to check in the reset table
+     * @returns boolean True if the reset token exists, otherwise false
+     */
+    public static function resetTokenExist($email) : bool {
+
+        $query = "SELECT EXISTS(SELECT * FROM securitylab.reset WHERE user_id = (SELECT id FROM securitylab.users WHERE email = $1));";
+        $param = array($email);
+
+        // Result only returns a boolean
+        $result = Database::getInstance()->doParamQuery($query, $param);
+
+        if ($result){
+
+            $resArray = pg_fetch_array($result);
+            pg_free_result($result);
+
+            return $resArray[0] == "t";
+        }
+
+        return false;
+    }
+
+    /**
+     * Deletes a reset token from a reset table
+     *
+     * @var $email string The email to check in the users table
+     *
+     */
+    public static function deleteResetToken($email): void{
+
+        $query = "DELETE FROM securitylab.reset WHERE user_id = (SELECT id FROM securitylab.users WHERE email = $1)";
+        $param = array($email);
+
+        // Result does not really need to return anything
+        Database::getInstance()->doParamQuery($query, $param);
+    }
+
+
+    /**
+     * Check if the email entered matches with the users reset token
+     *
+     * @var $email      string The email to check in the users table
+     * @var $resetToken string The reset token
+     * @return bool If the combination exists.
+     */
+    public static function resetTokenEmailMatch($email, $resetToken){
+
+        $query = "SELECT EXISTS(SELECT * FROM securitylab.reset
+            WHERE user_id = (SELECT id FROM securitylab.users WHERE email = $1)
+            AND reset_token = $2)";
+
+        $param = array($email, $resetToken);
+        $result = Database::getInstance()->doParamQuery($query, $param);
+
+        // Check if there was a match
+        if ($result){
+            $row = pg_fetch_array($result);
+            pg_free_result($result);
+
+            return $row[0] == "t";
+        }
+
+        return false;
+    }
+
+    /**
+     * Makes an attempt to change a users password
+     *
+     * @var $email       string The email to check in the users table
+     * @var $newPassword string The new password to change to
+     * @returns boolean True if password was changed, otherwise false
+     */
+    public static function changePassword($email, $newPassword): bool{
+
+        $query = "UPDATE securitylab.users SET password = $1 WHERE email = $2";
+
+        // Password has to be hashed before insertion!
+        $newPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        
+        $param = array($newPassword, $email);
+
+        $result = Database::getInstance()->doParamQuery($query, $param);
+
+        if ($result == null || $result == false){
+            return false;
+        } else {
+            pg_free_result($result);
+            return true;
+        }
+    }
 }

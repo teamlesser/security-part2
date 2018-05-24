@@ -15,6 +15,7 @@ function byId(id) {
 function main() {
 
 	byId("reset-password-button").addEventListener('click', doResetPassword, false);
+
     try {
         if (window.XMLHttpRequest) {
             // code for IE7+, Firefox, Chrome, Opera, Safari
@@ -39,22 +40,30 @@ function main() {
  ******************************************************************************/
 function doResetPassword() {
     if (byId('email-field').value !== "" && byId('newpass1-field').value !== "" &&
-        byId('newpass2-field').value !=='' && byId('resettoken-field').value !== '') {
-		
-		// For later: encrypt the json data before sending it. Only possible if we can use additional libraries such as crypto.js
-        var data = JSON.stringify(
-		{ 
-			"email": byId('email-field').value, 
-			"newpass1": byId('newpass1-field').value, 
-			"newpass2": byId('newpass2-field').value, 
-			"resettoken": byId('resettoken-field').value 
-		});
-        xhr.addEventListener('readystatechange', processResetPassword, false);
-        xhr.open('POST', 'user/processResetPassword.php', true);
-        xhr.setRequestHeader("Content-type", "application/json");
-        xhr.send(data);
+        byId('newpass2-field').value !=="" && byId('resettoken-field').value !== "") {
+
+        // Checks that passwords are the same
+        if (byId('newpass1-field').value === byId('newpass2-field').value){
+            var data = JSON.stringify(
+                {
+                    "email": byId('email-field').value,
+                    "newpass1": byId('newpass1-field').value,
+                    "newpass2": byId('newpass2-field').value,
+                    "resettoken": byId('resettoken-field').value
+                });
+
+            xhr.addEventListener('readystatechange', processResetPassword, false);
+
+            xhr.open('POST', '../user/processResetPassword.php', true);
+            xhr.setRequestHeader("Content-type", "application/json");
+            xhr.send(data);
+        }
+
+        else{
+            byId("fill-all-fields").innerHTML = "Passwords do not match";
+        }
     }else{
-        byId("fill-all-fields").innerHTML = "You must fill fill in all fields";
+        byId("fill-all-fields").innerHTML = "You must fill in all fields";
     }
 }
 
@@ -66,7 +75,7 @@ function processResetPassword() {
     if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
         
 		xhr.removeEventListener('readystatechange', processResetPassword, false);
-        var myResponse = JSON.parse(this.response);
+		var myResponse = JSON.parse(this.response);
         byId("return-message").innerHTML = myResponse.message;	  
 		
     } 

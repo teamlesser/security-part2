@@ -99,20 +99,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
 			// Both queries are done regardless if the e-mail exists to avoid timing attacks
 			$emailResult = emailExists($email);
 			$passwordResult = passwordVerifies($email, $password);
+            $userIsVerified = DbManager::isUserVerified($email);
 
 			// Login succeeded-path
 			if ($emailResult && $passwordResult){
 
-				// Create and give the user a JWT (token) as a session var
-				$token = array();
-				$token["username"] = getUsernameForEmail($email);
-				setcookie("logged_in", JWT::encode($token,
-					Config::getInstance()->getSetting("JWTSecretKey")),
-					0, "/", "", false, true);
+			    if ($userIsVerified){
+                    // Create and give the user a JWT (token) as a session var
+                    $token = array();
+                    $token["username"] = getUsernameForEmail($email);
+                    setcookie("logged_in", JWT::encode($token,
+                        Config::getInstance()->getSetting("JWTSecretKey")),
+                        0, "/", "", false, true);
 
-				// Set user messages
-				$response["message"] = "Login succeeded.";
-				$response["status"] = "success";
+                    // Set user messages
+                    $response["message"] = "Login succeeded.";
+                    $response["status"] = "success";
+                }
+
+                else {
+                    $response["message"] = "Account not verified.";
+                }
+
 			}// Login failed-path
 			else{
 				$response["message"] = "Login failed.";

@@ -36,11 +36,6 @@ function escapeString(string $string): string{
 	return pg_escape_literal($string);
 }
 
-
-function freeResource($resource){
-	pg_free_result($resource);
-}
-
 // Test functions
 
 /**

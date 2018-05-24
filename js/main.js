@@ -27,7 +27,7 @@ function main(){
     //Adds EventListeners to post message button.
     byId("button-post-message").addEventListener('click', doPostMessage, false);
     byId("logout-button").addEventListener('click', doLogout, false);
-    changeImages();
+
     // Creates matching XMLHttpRequest-object
     try {
         if (window.XMLHttpRequest) {
@@ -137,7 +137,7 @@ function processPostMessage(){
 function doLogout() {
     // EventListener for server state change
     xhr.addEventListener('readystatechange', processLogout, false);
-    xhr.open('GET', 'logout.php', true);
+    xhr.open('GET', '../user/logout.php', true);
     xhr.send(null);
 }
 

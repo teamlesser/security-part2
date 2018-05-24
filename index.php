@@ -4,7 +4,7 @@
  *
  * + * Date: 2018-05-14
  *
- * + * Desc: The start page where a user can login, navigate to register.php and resetpassword.php
+ * + * Desc: The start page where a user can login, navigate to register.php and resetPassword.php
  *
  * + */
 $title = "Security Lab - Group Four | Home page";
@@ -41,7 +41,7 @@ $title = "Security Lab - Group Four | Home page";
         <br>
         <a href="user/register.php">New user?</a>
         <br>
-        <a href="forgotpassword.php">Forgot password?</a>
+        <a href="user/forgotPassword.php">Forgot password?</a>
     </div>
     <div id="return-message"></div>
 
@@ -59,6 +59,7 @@ $title = "Security Lab - Group Four | Home page";
             <p>As a <span class="bold">user</span>, you will be able to</p>
             <ul>
                 <li><a href="user/register.php">Register</a> a new account</li>
+                <li>Login to an existing account</li>
                 <li>Post a message</li>
                 <li>Up/Down-vote message(s)</li>
             </ul>
