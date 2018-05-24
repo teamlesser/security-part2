@@ -39,7 +39,7 @@ function main() {
  ******************************************************************************/
 function doForgotPassword() {
 	
-	if (byId('email').value != ""){
+	if (byId('email').value !== ""){
         
         var data = JSON.stringify({"email": byId('email-field').value});
         xhr.addEventListener('readystatechange', processForgotPassword, false);

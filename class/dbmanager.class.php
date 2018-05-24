@@ -176,8 +176,6 @@ class DbManager{
 				}
 			}
 		}
-
-
 		return $detailsFromAttribute;
 	}
 	// =================================================================
@@ -475,7 +473,7 @@ class DbManager{
 	* @var $userid The userid to check in the reset table
 	* @returns boolean True if the reset token exists, otherwise false
 	*/
-	function resetTokenExist($userid) : bool {
+	public static function resetTokenExist($userid) : bool {
 		
 		$query = "SELECT reset_token FROM securitylab.reset WHERE user_id = $1 AND reset_token IS NOT NULL";
 		$param = array($userid);
@@ -498,7 +496,7 @@ class DbManager{
 	* @var $resetToken The reset token
 	* @returns boolean True if the reset token was added successfully, otherwise false
 	*/
-	function addResetToken($userid, $resetToken) : bool {
+	public static function addResetToken($userid, $resetToken) : bool {
 		
 		$date = date('Y-m-d H:i:s');
 		$query = "UPDATE securitylab.reset SET reset_token = $1, reset_token_inserted_time = $2 WHERE user_id = $3";

@@ -31,7 +31,13 @@ function getUserID($email): int{
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
 	
 	// Create an instance of mailer
-	$mailer = new Mailer;
+	$mailer = null;
+	try{
+		$mailer = new Mailer;
+	}catch (\PHPMailer\PHPMailer\Exception $e){
+		// Nothing to display. This is just for sending message
+	}
+
 	
 	// Store the post data
 	$data = json_decode( file_get_contents( 'php://input' ), true );
@@ -48,7 +54,8 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$userid = getUserID($email); // Make sure the user exists
 		if($userid > 0) {
 		
-			if(DbManager::resetTokenExist($userid) { // Make sure the user does not have a reset token already
+			if(DbManager::resetTokenExist($userid)) { // Make sure the user does not have a reset
+				// token already
 				
 				$response["message"] = "An email with a reset link has already been sent to your email.";
 				
@@ -58,11 +65,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 				$resetToken = bin2hex(random_bytes(32));
 
 				// Add the reset token to the users table
-				if(DbManager::addResetToken($userid, $resetToken)) {
-
+				if(DbManager::addResetToken($userid, $resetToken)){
+					if ($mailer !== null){
 					$response["message"] = "An email with a reset link has been sent to your mail.";
 					$response["status"] = true;
 					$mailer->sendResetPasswordEmail($email, $resetToken);
+				}
 
 				} else {
 
