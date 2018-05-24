@@ -28,15 +28,11 @@
         <h2>Reset Password</h2>
 		<p>Enter your email and reset token aswell as your new password twice. Click the Reset password button to confirm password change.</p>
         <form id="resetPasswordForm">
-            <label for="email-field">Email:</label><br/>
-            <input type="email" placeholder="Email" name="email" id="email-field" required><br/>
-			<label for="resettoken-field">Reset token:</label><br/>
-			<input type="text" placeholder="Reset token" name="resettoken" id="resettoken-field" required><br/>
-			<label for="newpass1-field">New password:</label><br/>
-            <input type="password" placeholder="New password" name="newpass1" id="newpass1-field" required><br/>
-			<label for="newpass2-field">Confirm new password:</label><br/>
-            <input type="password" placeholder="Confirm new password" name="newpass2" id="newpass2-field" required><br/>
-            <button type="button" id="reset-password-button">Reset Password</button>
+            <input type="email" placeholder="Email" name="email" id="email-field" required>
+			<input type="text" placeholder="Reset token" name="resettoken" id="resettoken-field" required>
+            <input type="password" placeholder="New password" name="newpass1" id="newpass1-field" required>
+            <input type="password" placeholder="Confirm new password" name="newpass2" id="newpass2-field" required>
+            <button type="button" id="reset-password-button">Reset</button>
         </form>
         <p id="fill-all-fields" class="error"></p>
 	</div>

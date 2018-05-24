@@ -41,7 +41,7 @@ $title = "Security Lab - Group Four | Home page";
         <br>
         <a href="user/register.php">New user?</a>
         <br>
-        <a href="resetpassword.php">Forgot password?</a>
+        <a href="forgotpassword.php">Forgot password?</a>
     </div>
     <div id="return-message"></div>
 
@@ -59,7 +59,6 @@ $title = "Security Lab - Group Four | Home page";
             <p>As a <span class="bold">user</span>, you will be able to</p>
             <ul>
                 <li><a href="user/register.php">Register</a> a new account</li>
-                <li><a href="user/login.php">Login </a> to an existing account</li>
                 <li>Post a message</li>
                 <li>Up/Down-vote message(s)</li>
             </ul>

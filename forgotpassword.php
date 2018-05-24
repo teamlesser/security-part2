@@ -16,6 +16,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forgot password</title>
     <script src="js/forgotpassword.js"></script>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
@@ -27,9 +28,8 @@
         <h2>Forgot Password</h2>
 		<p>Enter your e-mail and we will send you a password recovery link.</p>
         <form id="forgottenPasswordForm">
-            <label for="email-field">Email:</label><br/>
-            <input type="email" placeholder="Enter" name="email" id="email-field" required><br/>
-            <button type="button" id="forgot-password-button">Forgot Password</button>
+            <input type="email" placeholder="Enter email address" name="email" id="email-field" required>
+            <button type="button" id="forgot-password-button">Send email</button>
         </form>
 	</div>
 
