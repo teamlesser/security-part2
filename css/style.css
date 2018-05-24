@@ -24,7 +24,7 @@ html {
     margin-bottom: 50px;
 }
 
-#login-button, #register-button {
+#login-button, #register-button, #reset-password-button, #forgot-password-button {
     background: darkorange;
     display: block;
     margin: 0 auto;
@@ -38,7 +38,7 @@ html {
     text-transform: uppercase;
 }
 
-#login-button:hover {
+#login-button:hover,#register-button:hover, #reset-password-button:hover, #forgot-password-button:hover {
     opacity: 0.85;
 }
 
@@ -196,7 +196,7 @@ font, center, s, u, b, i {
 
 /*--------- REGISTRATION ------------*/
 
-#loginForm input {
+#loginForm input, #resetPasswordForm input, #forgottenPasswordForm input {
     display: block;
     margin: 0 auto 2px;
     padding: 2px;
