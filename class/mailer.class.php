@@ -87,8 +87,8 @@ class Mailer {
         $body = "<html>
 							<h3>Welcome " . $to . "!</h3>
 							<p>In order to verify your account, please click the following link:</p><br/>
-							<a href='http://localhost/securitylab/user/verifyUser.php?code=" . $registrationCode . "'>Click here to verify your registration</a>
-							<p>Plaintext: http://localhost/securitylab/user/verifyUser.php?code=$registrationCode</p>
+							<a href='http://localhost:8080/securitylab/user/verifyUser.php?code=" . $registrationCode . "'>Click here to verify your registration</a>
+							<p>Plaintext: http://localhost:8080/securitylab/user/verifyUser.php?code=$registrationCode</p>
 						</html>";
         $pageMsg = "A registration mail has been sent to " . $to;
 
@@ -105,8 +105,8 @@ class Mailer {
         $body =  "<html>
 							<h3>Hello " . $to . "!</h3>
 							<p>The link below will allow you to choose a new password:</p><br/>
-							<a href='http://localhost/securitylab/user/resetPassword.php?code=" . $resetPasswordCode . "'>Click here to reset your password</a>
-							<p>Plaintext: http://localhost/securitylab/user/resetPassword.php?code=$resetPasswordCode</p>
+							<a href='http://localhost:8080/securitylab/user/resetPassword.php?code=" . $resetPasswordCode . "'>Click here to reset your password</a>
+							<p>Plaintext: http://localhost:8080/securitylab/user/resetPassword.php?code=$resetPasswordCode</p>
 						</html>";
         $pageMsg = "A reset password mail has been sent to " . $to;
 
@@ -119,7 +119,7 @@ class Mailer {
      */
     public function sendRegistrationConfirmationEmail($to) {
         $subject = "Registration Complete";
-        $body = "Hey " . $to . "!. Your account is now activated and you can log in here: <a href='http://localhost/securitylab/index.php'>Click here to login</a>";
+        $body = "Hey " . $to . "!. Your account is now activated and you can log in here: <a href='http://localhost:8080/securitylab/index.php'>Click here to login</a>";
         $pageMsg = "A registration confirmation mail has been sent to " . $to;
 
         $this->sendMail($to, $subject, $body, $pageMsg);
@@ -131,7 +131,7 @@ class Mailer {
      */
 	public function sendResetPasswordConfirmationEmail($to) {
 		$subject = "Password has been changed";
-		$body = "Hey " . $to . "!. Your password has been changed. You can login here: <a href='http://localhost/securitylab/index.php'>Click here to login</a>";
+		$body = "Hey " . $to . "!. Your password has been changed. You can login here: <a href='http://localhost:8080/securitylab/index.php'>Click here to login</a>";
 		$pageMsg = "A reset password confirmation mail has been sent to " . $to;
 
 		$this->sendMail($to, $subject, $body, $pageMsg);
