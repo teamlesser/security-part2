@@ -104,3 +104,9 @@ CREATE TABLE securitylab.keyword(
   keyword VARCHAR(24) NOT NULL CHECK (keyword <> ''::text),
   UNIQUE(message_id, keyword)
 );
+
+CREATE TABLE securitylab.loginattempts(
+  id SERIAL NOT NULL PRIMARY KEY,
+  email VARCHAR(256) NOT NULL CHECK (email <> ''::text),
+  attempttime TIMESTAMP DEFAULT  EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) * 1000; 
+);
