@@ -11,7 +11,6 @@ include_once "../utils/util.php";
 
 // JWT Helper
 require_once "../vendor/jwt_helper.php";
-$timed_out;
 // Response array, set to negative values at first.
 $response = array(
 	"status"  => "error",
@@ -21,7 +20,7 @@ $response = array(
 /**
  * Checks if an e-mail exists in the database and returns a bool.
  *
- * @param $email string The e-mail to search for.
+ * @param $email string The e-m(256) NOT Nail to search for.
  *
  * @return bool If the email exists in the database.
  */
