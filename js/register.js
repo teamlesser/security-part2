@@ -75,10 +75,11 @@ function doRegister() {
                 // EventListener for server state change
                 xhr.addEventListener('readystatechange', processRegister, false);
 
-                username = encodeURIComponent(username);
+                // Should not be needed since we have Prepared statements and check when outputting from DB to the website.
+/*                 username = encodeURIComponent(username);
                 password = encodeURIComponent(password);
                 passwordAgain = encodeURIComponent(passwordAgain);
-                email = encodeURIComponent(email);
+                email = encodeURIComponent(email); */
 
                 // Message is composed and sent as JSON
                 var data = JSON.stringify({
