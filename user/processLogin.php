@@ -11,7 +11,7 @@ include_once "../utils/util.php";
 
 // JWT Helper
 require_once "../vendor/jwt_helper.php";
-
+$timed_out;
 // Response array, set to negative values at first.
 $response = array(
 	"status"  => "error",
@@ -68,7 +68,7 @@ function passwordVerifies($email, $password): bool{
 function getUsernameForEmail($email): string{
 	// Query for the username with the e-mail
 	$user = DbManager::getUserByAttribute($email);
-
+	
 	if (!empty($user)){
 		return $user["username"];
 	}
@@ -76,7 +76,48 @@ function getUsernameForEmail($email): string{
 	return null;
 
 }
-
+function isTimedOut($email): bool {
+	$query = "SELECT * FROM securitylab.loginattempts WHERE email = $1";
+	$db = Database::getInstance();
+	$response = $db->doParamQuery($query, [$email]);
+	if($response) {
+		$attempts = pg_fetch_all($response);
+		$earliest;
+		if(count($attempts)>2) {
+			foreach($attempts as $attempt) {
+				if(isset($earliest)) {
+					if($earliest["attempttime"] > $attempt["attempttime"]) $earliest = $attempt; 
+				}
+				else $earliest = $attempt;
+			}
+		}
+		return $earliest["attempttime"] > (DateTime::getTimestamp() - 60000);
+	}
+	return false;
+}
+function failedAttempt($email): string {
+	$query = "SELECT * FROM securitylab.loginattempts WHERE email = $1";
+	$db = Database::getInstance();
+	$response = $db->doParamQuery($query, [$email]);
+	if($response) {
+		$attempts = pg_fetch_all($response);
+		$earliest;
+		if(count($attempts)>2) {
+			foreach($attempts as $attempt) {
+				if(isset($earliest)) {
+					if($earliest["attempttime"] > $attempt["attempttime"]) $earliest = $attempt; 
+				}
+				else $earliest = $attempt;
+			}
+			$query "UPDATE securitylab.loginattempts SET attempttime = $1 WHERE email = $2 AND attempttime = $3";
+			$db->doParamQuery($query, [DateTime::getTimestamp(), $email, $earliest['attempttime']]);
+		} else {
+			$query = "INSERT INTO  securitylab.loginattempts (email) VALUES($1)";
+			db->doParamQuery($query, [$email]);
+		}
+	}
+	return "Failed login!";
+}
 
 // Checks that request method is POST
 if ($_SERVER["REQUEST_METHOD"] == "POST"){
@@ -102,24 +143,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
             $userIsVerified = DbManager::isUserVerified($email);
 
 			// Login succeeded-path
-			if ($emailResult && $passwordResult){
-
-			    if ($userIsVerified){
-                    // Create and give the user a JWT (token) as a session var
-                    $token = array();
-                    $token["username"] = getUsernameForEmail($email);
-                    setcookie("logged_in", JWT::encode($token,
-                        Config::getInstance()->getSetting("JWTSecretKey")),
-                        0, "/", "", false, true);
-
-                    // Set user messages
-                    $response["message"] = "Login succeeded.";
-                    $response["status"] = "success";
-                }
-
-                else {
-                    $response["message"] = "Account not verified.";
-                }
+			if ($emailResult){
+				if(!isTimedOut($email)) {
+					if($passwordResult) {
+	
+						if ($userIsVerified){
+											// Create and give the user a JWT (token) as a session var
+											$token = array();
+											$token["username"] = getUsernameForEmail($email);
+											setcookie("logged_in", JWT::encode($token,
+													Config::getInstance()->getSetting("JWTSecretKey")),
+													0, "/", "", false, true);
+	
+											// Set user messages
+											$response["message"] = "Login succeeded.";
+											$response["status"] = "success";
+									}
+	
+									else {
+											$response["message"] = "Account not verified.";
+									}
+					} else {
+						$response["message"] = failedAttempt($email);
+					}
+				} else {
+					$response["message"] = "You are timed out";
+				}
 
 			}// Login failed-path
 			else{
