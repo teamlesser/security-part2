@@ -64,41 +64,47 @@ function doRegister() {
         var passwordAgain = byId("password-again-field").value;
         var email = byId("email-field").value;
 
-        //Check so that password and password confirmation doesn't differ AND THAT PASSWORD IS BETWEEN 8-64 CHARS
-        if(password === passwordAgain && password.length >= 8 && password.length <= 64) {
+        //CHECK USERNAME SO IT IS NOT OVER 64 CHARS
+        if(username.length <= 64){
+            //Check so that password and password confirmation doesn't differ AND THAT PASSWORD IS BETWEEN 8-64 CHARS
+            if (password === passwordAgain && password.length >= 8 && password.length <= 64) {
 
-            // Check that e-mail has correct format
-            var emailRegex = /[\w]+@[\w]+\.[a-zA-Z]+/;
+                // Check that e-mail has correct format
+                var emailRegex = /[\w]+@[\w]+\.[a-zA-Z]+/;
 
-            if (email.match(emailRegex)) {
+                if (email.match(emailRegex)) {
 
-                // EventListener for server state change
-                xhr.addEventListener('readystatechange', processRegister, false);
+                    // EventListener for server state change
+                    xhr.addEventListener('readystatechange', processRegister, false);
 
-                username = encodeURIComponent(username);
-                password = encodeURIComponent(password);
-                passwordAgain = encodeURIComponent(passwordAgain);
-                email = encodeURIComponent(email);
+                    username = encodeURIComponent(username);
+                    password = encodeURIComponent(password);
+                    passwordAgain = encodeURIComponent(passwordAgain);
+                    email = encodeURIComponent(email);
 
-                // Message is composed and sent as JSON
-                var data = JSON.stringify({
-                    "username": username,
-                    "password": password,
-                    "passwordAgain": passwordAgain,
-                    "email": email
-                });
+                    // Message is composed and sent as JSON
+                    var data = JSON.stringify({
+                        "username": username,
+                        "password": password,
+                        "passwordAgain": passwordAgain,
+                        "email": email
+                    });
 
-                xhr.open("POST", "processRegister.php", true);
-                xhr.setRequestHeader("Content-Type", "application/json");
-                xhr.send(data);
+                    xhr.open("POST", "processRegister.php", true);
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                    xhr.send(data);
 
+                }
+                else {
+                    byId("return-message").innerHTML = "E-mail has incorrect format.";
+                }
             }
             else {
-                byId("return-message").innerHTML = "E-mail has incorrect format.";
+                byId("return-message").innerHTML = "'Confirmation password' does not match 'password' OR password is not between 8-64 chars.";
             }
         }
-        else{
-            byId("return-message").innerHTML = "'Confirmation password' does not match 'password' OR password is not between 8-64 chars.";
+        else {
+            byId("return-message").innerHTML = "Username is to long, max 64 chars";
         }
     }
 

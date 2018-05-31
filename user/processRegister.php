@@ -20,43 +20,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
     // Checks that required fields aren't empty
     if (!empty($input->username) && !empty($input->password) && !empty($input->passwordAgain) && !empty($input->email)){
 
-        //replace '%40' with '@'
-        $email = urldecode($input->email);
+        //CHECK THAT LENGTH OF USERNAME IS NOT OVER 64 CHARS
+        $userNameLength = strlen($input->username);
+        if($userNameLength > 64){
+            //replace '%40' with '@'
+            $email = urldecode($input->email);
 
-        // Remove all illegal characters from email
-        $email = filter_var($email, FILTER_SANITIZE_EMAIL);
+            // Remove all illegal characters from email
+            $email = filter_var($email, FILTER_SANITIZE_EMAIL);
 
-        //make sure email-address is in a valid format
-        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            //make sure email-address is in a valid format
+            if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
 
-            $psw = $input->password;
-            $pswAgain = $input->passwordAgain;
+                $psw = $input->password;
+                $pswAgain = $input->passwordAgain;
 
-            //make sure that password and confirmational password match AND ARE BETWEEN 8-64 CHARS LONG
-            if(strcmp($psw, $pswAgain) == 0 && strlen($psw) >= 8 && strlen($psw) <= 64){
+                //make sure that password and confirmational password match AND ARE BETWEEN 8-64 CHARS LONG
+                if(strcmp($psw, $pswAgain) == 0 && strlen($psw) >= 8 && strlen($psw) <= 64){
 
-                //sanitize username
-                $userName = filter_var($input->username, FILTER_SANITIZE_STRING);
-                //hash password
-                $psw = password_hash($psw, PASSWORD_DEFAULT);
+                    //sanitize username
+                    $userName = filter_var($input->username, FILTER_SANITIZE_STRING);
+                    //hash password
+                    $psw = password_hash($psw, PASSWORD_DEFAULT);
 
-                //try to add user to database
-                $response["message"] = DbManager::addUser($userName, $psw, $email);
-                $response["status"] = "success";
+                    //try to add user to database
+                    $response["message"] = DbManager::addUser($userName, $psw, $email);
+                    $response["status"] = "success";
 
+                }
+                else{
+                    $response["message"] = "Password and confirmation password don't match OR password is not between 8-64 chars!";
+                }
             }
-            else{
-                $response["message"] = "Password and confirmation password don't match OR password is not between 8-64 chars!";
+            else {
+                $response["message"] = "Email is not valid!";
             }
         }
-        else {
-            $response["message"] = "Email is not valid!";
+        else{
+            $response["message"] = "Username is longer than maximum 64 chars!";
         }
-
     }else{
         $response["message"] = "One or more fields were empty.";
     }
-
 }
 
 // Sends response as JSON
