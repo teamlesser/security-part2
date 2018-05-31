@@ -69,33 +69,39 @@ function doRegister() {
 
             // Check that e-mail has correct format
             var emailRegex = /[\w]+@[\w]+\.[a-zA-Z]+/;
+            var usernameRegex = /^[a-zA-Z][a-zA-Z0-9_]+[a-zA-Z0-9]+$/;
 
-            if (email.match(emailRegex)) {
+            if (username.match(usernameRegex)) {
 
-                // EventListener for server state change
-                xhr.addEventListener('readystatechange', processRegister, false);
+                if (email.match(emailRegex)) {
 
-                // Should not be needed since we have Prepared statements and check when outputting from DB to the website.
-/*                 username = encodeURIComponent(username);
-                password = encodeURIComponent(password);
-                passwordAgain = encodeURIComponent(passwordAgain);
-                email = encodeURIComponent(email); */
+                    // EventListener for server state change
+                    xhr.addEventListener('readystatechange', processRegister, false);
 
-                // Message is composed and sent as JSON
-                var data = JSON.stringify({
-                    "username": username,
-                    "password": password,
-                    "passwordAgain": passwordAgain,
-                    "email": email
-                });
+                    // Should not be needed since we have Prepared statements and check when outputting from DB to the website.
+        /*                 username = encodeURIComponent(username);
+                    password = encodeURIComponent(password);
+                    passwordAgain = encodeURIComponent(passwordAgain);
+                    email = encodeURIComponent(email); */
 
-                xhr.open("POST", "processRegister.php", true);
-                xhr.setRequestHeader("Content-Type", "application/json");
-                xhr.send(data);
+                    // Message is composed and sent as JSON
+                    var data = JSON.stringify({
+                        "username": username,
+                        "password": password,
+                        "passwordAgain": passwordAgain,
+                        "email": email
+                    });
 
-            }
-            else {
-                byId("return-message").innerHTML = "E-mail has incorrect format.";
+                    xhr.open("POST", "processRegister.php", true);
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                    xhr.send(data);
+
+                }
+                else {
+                    byId("return-message").innerHTML = "E-mail has incorrect format.";
+                }
+            } else {
+                byId("return-message").innerHTML = "Username contains illegal chars."
             }
         }
         else{
