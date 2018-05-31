@@ -34,7 +34,7 @@ if (!isset($_COOKIE["logged_in"])){
 	returnToIndex();
 
 }else{
-	$username = getJWTUsername();
+	$username =  getJWTUsername();
 }
 
 // Counts vote, if one was posted
@@ -114,7 +114,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
 
 <main>
 
-    <div id="div-logged-in-as">Logged in as <?php echo $username ?></div>
+    <div id="div-logged-in-as">Logged in as <?php echo htmlspecialchars($username); ?></div>
     <div id="logout-div">
         <button type="button" id="logout-button">Logga ut</button>
         <p id="logout-message"></p>
@@ -174,42 +174,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
 
                         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
                             <button class="upvote<?php if($thisUserVote == 1){echo "d";}?>" type="submit" name="vote"
-                                    value="<?php echo JWT::encode($jwtVoteArray, Config::getInstance()->getSetting("JWTSecretKey")) ?>" >
+                                    value="<?php echo htmlspecialchars(JWT::encode($jwtVoteArray, Config::getInstance()->getSetting("JWTSecretKey"))) ?>" >
                             </button>
                         </form>
 
-                        <p class="count"><?php echo $message->getVotes(); ?></p>
+                        <p class="count"><?php echo htmlspecialchars($message->getVotes()); ?></p>
 
                         <?php $jwtVoteArray["vote"] = -1 ?>
 
                         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
                             <button class="downvote<?php if($thisUserVote == -1){echo "d";}?>" type="submit" name="vote"
-                                    value="<?php echo JWT::encode($jwtVoteArray, Config::getInstance()->getSetting("JWTSecretKey")) ?>">
+                                    value="<?php echo htmlspecialchars(JWT::encode($jwtVoteArray, Config::getInstance()->getSetting("JWTSecretKey"))) ?>">
                             </button>
                         </form>
 
                     </div>
 
                     <div class="message-contents">
-                    <p><?php echo $message->getMessage() ?></p>
+                    <p><?php echo htmlspecialchars($message->getMessage()); ?></p>
 
                         <div class="message-info">
 
-                            <p><span class="bold">By:</span> <?php echo $message->getUsername() ?></p>
+                            <p><span class="bold">By:</span> <?php echo htmlspecialchars($message->getUsername()) ?></p>
 
                             <?php if (!empty($message->getKeywords())): ?>
                                 <p class="keyword"><span class="bold">Keywords:</span> <?php
                                     foreach ($message->getKeywords() as $keyword){
-                                        echo $keyword . " ";
+                                        echo htmlspecialchars($keyword) . " ";
                                     } ?></p>
                             <?php endif ?>
 
-                            <p><span class="bold">Date:</span> <?php echo $message->getDate() ?></p>
+                            <p><span class="bold">Date:</span> <?php echo htmlspecialchars($message->getDate()) ?></p>
 
                             <?php if ($username === $message->getUsername()): ?>
 
                                 <form action="deleteMessage.php" method="post">
-                                    <button type="submit" value="<?php echo $message->getMessageId(); ?>"
+                                    <button type="submit" value="<?php echo htmlspecialchars($message->getMessageId()); ?>"
                                             name="delete">Delete</button>
                                 </form>
 
