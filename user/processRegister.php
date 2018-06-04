@@ -21,8 +21,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
     if (!empty($input->username) && !empty($input->password) && !empty($input->passwordAgain) && !empty($input->email)){
 
         //CHECK THAT LENGTH OF USERNAME IS NOT OVER 64 CHARS
-        $userNameLength = strlen($input->username);
-        if($userNameLength > 64){
+        $userNameLength = strlen(utf8_decode($input->username));
+        if($userNameLength <= 64){
             //replace '%40' with '@'
             $email = urldecode($input->email);
 
