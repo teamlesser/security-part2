@@ -96,18 +96,20 @@ function doRegister() {
                   else {
                       byId("return-message").innerHTML = "E-mail has incorrect format.";
                   }
-              } else {
-                  byId("return-message").innerHTML = "Username contains illegal chars."
-              }
-          else {
+                } 
+            else {
+                byId("return-message").innerHTML = "Username contains illegal chars.";
+            }
+             }
+             else {
               byId("return-message").innerHTML = "'Confirmation password' does not match 'password' OR password is not between 8-64 chars.";
           }
         }
         else {
             byId("return-message").innerHTML = "Username is to long, max 64 chars";
         }
+        
     }
-
     else {
         byId("return-message").innerHTML = "At least one of the fields are empty.";
     }
