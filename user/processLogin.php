@@ -77,8 +77,7 @@ function getUsernameForEmail($email): string{
 }
 function isTimedOut($email): bool {
 	$query = "SELECT * FROM securitylab.loginattempts WHERE email = $1";
-	$db = Database::getInstance();
-	$response = $db->doParamQuery($query, [$email]);
+	$response = Database::getInstance()->doParamQuery($query, array($email));
 	if($response) {
 		$attempts = pg_fetch_all($response);
 		$earliest;
@@ -89,30 +88,40 @@ function isTimedOut($email): bool {
 				}
 				else $earliest = $attempt;
 			}
+			return $earliest["attempttime"] > (time()-60);
 		}
-		return $earliest["attempttime"] > (DateTime::getTimestamp() - 60000);
 	}
 	return false;
 }
 function failedAttempt($email): string {
 	$query = "SELECT * FROM securitylab.loginattempts WHERE email = $1";
-	$db = Database::getInstance();
-	$response = $db->doParamQuery($query, [$email]);
+	$response = Database::getInstance()->doParamQuery($query, array($email));
 	if($response) {
 		$attempts = pg_fetch_all($response);
 		$earliest;
 		if(count($attempts)>2) {
+			$time = time();
 			foreach($attempts as $attempt) {
 				if(isset($earliest)) {
-					if($earliest["attempttime"] > $attempt["attempttime"]) $earliest = $attempt; 
+					if($earliest["attempttime"] > $attempt["attempttime"]) $earliest = $attempt;
+					if($time == $attempt["attempttime"]) $time++;
 				}
 				else $earliest = $attempt;
 			}
-			$query "UPDATE securitylab.loginattempts SET attempttime = $1 WHERE email = $2 AND attempttime = $3";
-			$db->doParamQuery($query, [DateTime::getTimestamp(), $email, $earliest['attempttime']]);
-		} else {
-			$query = "INSERT INTO  securitylab.loginattempts (email) VALUES($1)";
-			db->doParamQuery($query, [$email]);
+			$query2 = "UPDATE securitylab.loginattempts SET attempttime = $1 WHERE email = $2 AND attempttime = $3";
+			Database::getInstance()->doParamQuery($query2, array($time, $email, $earliest['attempttime']));
+		} 
+		else if(count($attempts) < 3 && count($attempts) >= 0) {
+			$time = time();
+			foreach($attempts as $attempt) {
+				if($time == $attempt["attempttime"]) $time++;
+			}
+			$query2 = "INSERT INTO  securitylab.loginattempts (email, attempttime) VALUES($1,$2)";
+			Database::getInstance()->doParamQuery($query2, array($email, $time));
+		}
+		else {
+			$query2 = "INSERT INTO  securitylab.loginattempts (email, attempttime) VALUES($1,$2)";
+			Database::getInstance()->doParamQuery($query2, array($email, time()));
 		}
 	}
 	return "Failed login!";
@@ -147,21 +156,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
 					if($passwordResult) {
 	
 						if ($userIsVerified){
-											// Create and give the user a JWT (token) as a session var
-											$token = array();
-											$token["username"] = getUsernameForEmail($email);
-											setcookie("logged_in", JWT::encode($token,
-													Config::getInstance()->getSetting("JWTSecretKey")),
-													0, "/", "", false, true);
-	
-											// Set user messages
-											$response["message"] = "Login succeeded.";
-											$response["status"] = "success";
-									}
-	
-									else {
-											$response["message"] = "Account not verified.";
-									}
+								// Create and give the user a JWT (token) as a session var
+								$token = array();
+								$token["username"] = getUsernameForEmail($email);
+								setcookie("logged_in", JWT::encode($token,
+										Config::getInstance()->getSetting("JWTSecretKey")),
+										0, "/", "", false, true);
+
+								// Set user messages
+								$response["message"] = "Login succeeded.";
+								$response["status"] = "success";
+						}
+
+						else {
+								$response["message"] = "Account not verified.";
+						}
 					} else {
 						$response["message"] = failedAttempt($email);
 					}
