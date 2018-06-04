@@ -108,5 +108,5 @@ CREATE TABLE securitylab.keyword(
 CREATE TABLE securitylab.loginattempts(
   id SERIAL NOT NULL PRIMARY KEY,
   email VARCHAR(256) NOT NULL CHECK (email <> ''::text),
-  attempttime TIMESTAMP DEFAULT  EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) * 1000; 
+  attempttime INTEGER NOT NULL
 );
