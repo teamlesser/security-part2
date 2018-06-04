@@ -33,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
             $pswAgain = $input->passwordAgain;
 
             //make sure that password and confirmational password match AND ARE BETWEEN 8-64 CHARS LONG
-            if(strcmp($psw, $pswAgain) == 0 && strlen($psw) >= 8 && strlen($psw) <= 64){
+            if(strcmp($psw, $pswAgain) == 0 && strlen(utf_8_decode($psw)) >= 8 && strlen(utf_8_decode($psw)) <= 64){
 
                 //sanitize username
                 $userName = filter_var($input->username, FILTER_SANITIZE_STRING);

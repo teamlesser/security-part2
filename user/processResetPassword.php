@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         $newpass2 = $data->newpass2;
         $resetToken = $data->resettoken;
 
-        if ($newpass1 != $newpass2 || strlen($newpass1) < 8 || strlen($newpass1) > 64){ // Check if the passwords match AND ARE BETWEEN 8-64 CHARS
+        if ($newpass1 != $newpass2 || strlen(utf_8_decode($newpass1)) < 8 || strlen(utf_8_decode($newpass1)) > 64){ // Check if the passwords match AND ARE BETWEEN 8-64 CHARS
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)){ // Check if the email entered is valid
         } elseif (!DbManager::emailExist($email)){ // Check if the email exists
         } else {
