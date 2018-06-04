@@ -32,8 +32,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
             $psw = $input->password;
             $pswAgain = $input->passwordAgain;
 
-            //make sure that password and confirmational password match
-            if(strcmp($psw, $pswAgain) == 0){
+            //make sure that password and confirmational password match AND ARE BETWEEN 8-64 CHARS LONG
+            if(strcmp($psw, $pswAgain) == 0 && strlen(utf_8_decode($psw)) >= 8 && strlen(utf_8_decode($psw)) <= 64){
 
                 //sanitize username
                 $userName = filter_var($input->username, FILTER_SANITIZE_STRING);
@@ -46,7 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
 
             }
             else{
-                $response["message"] = "Password and confirmation password don't match!";
+                $response["message"] = "Password and confirmation password don't match OR password is not between 8-64 chars!";
             }
         }
         else {

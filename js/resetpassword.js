@@ -42,8 +42,8 @@ function doResetPassword() {
     if (byId('email-field').value !== "" && byId('newpass1-field').value !== "" &&
         byId('newpass2-field').value !=="" && byId('resettoken-field').value !== "") {
 
-        // Checks that passwords are the same
-        if (byId('newpass1-field').value === byId('newpass2-field').value){
+        // Checks that passwords are the same AND THAT PASSWORD IS BETWEEN 8-64 CHARS
+        if (byId('newpass1-field').value === byId('newpass2-field').value && byId('newpass1-field').value.length >= 8 && byId('newpass1-field').value.length <= 64){
             var data = JSON.stringify(
                 {
                     "email": byId('email-field').value,
@@ -60,7 +60,7 @@ function doResetPassword() {
         }
 
         else{
-            byId("fill-all-fields").innerHTML = "Passwords do not match";
+            byId("fill-all-fields").innerHTML = "Passwords do not match OR is not between 8-64 chars";
         }
     }else{
         byId("fill-all-fields").innerHTML = "You must fill in all fields";

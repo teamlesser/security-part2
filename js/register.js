@@ -64,8 +64,8 @@ function doRegister() {
         var passwordAgain = byId("password-again-field").value;
         var email = byId("email-field").value;
 
-        //Check so that password and password confirmation doesn't differ
-        if(password === passwordAgain) {
+        //Check so that password and password confirmation doesn't differ AND THAT PASSWORD IS BETWEEN 8-64 CHARS
+        if(password === passwordAgain && password.length >= 8 && password.length <= 64) {
 
             // Check that e-mail has correct format
             var emailRegex = /[\w]+@[\w]+\.[a-zA-Z]+/;
@@ -98,7 +98,7 @@ function doRegister() {
             }
         }
         else{
-            byId("return-message").innerHTML = "'Confirmation password' does not match 'password'";
+            byId("return-message").innerHTML = "'Confirmation password' does not match 'password' OR password is not between 8-64 chars.";
         }
     }
 
