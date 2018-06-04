@@ -11,7 +11,6 @@ include_once "../utils/util.php";
 
 // JWT Helper
 require_once "../vendor/jwt_helper.php";
-
 // Response array, set to negative values at first.
 $response = array(
 	"status"  => "error",
@@ -21,7 +20,7 @@ $response = array(
 /**
  * Checks if an e-mail exists in the database and returns a bool.
  *
- * @param $email string The e-mail to search for.
+ * @param $email string The e-m(256) NOT Nail to search for.
  *
  * @return bool If the email exists in the database.
  */
@@ -68,7 +67,7 @@ function passwordVerifies($email, $password): bool{
 function getUsernameForEmail($email): string{
 	// Query for the username with the e-mail
 	$user = DbManager::getUserByAttribute($email);
-
+	
 	if (!empty($user)){
 		return $user["username"];
 	}
@@ -76,7 +75,57 @@ function getUsernameForEmail($email): string{
 	return null;
 
 }
-
+function isTimedOut($email): bool {
+	$query = "SELECT * FROM securitylab.loginattempts WHERE email = $1";
+	$response = Database::getInstance()->doParamQuery($query, array($email));
+	if($response) {
+		$attempts = pg_fetch_all($response);
+		$earliest;
+		if(count($attempts)>2) {
+			foreach($attempts as $attempt) {
+				if(isset($earliest)) {
+					if($earliest["attempttime"] > $attempt["attempttime"]) $earliest = $attempt; 
+				}
+				else $earliest = $attempt;
+			}
+			return $earliest["attempttime"] > (time()-60);
+		}
+	}
+	return false;
+}
+function failedAttempt($email): string {
+	$query = "SELECT * FROM securitylab.loginattempts WHERE email = $1";
+	$response = Database::getInstance()->doParamQuery($query, array($email));
+	if($response) {
+		$attempts = pg_fetch_all($response);
+		$earliest;
+		if(count($attempts)>2) {
+			$time = time();
+			foreach($attempts as $attempt) {
+				if(isset($earliest)) {
+					if($earliest["attempttime"] > $attempt["attempttime"]) $earliest = $attempt;
+					if($time == $attempt["attempttime"]) $time++;
+				}
+				else $earliest = $attempt;
+			}
+			$query2 = "UPDATE securitylab.loginattempts SET attempttime = $1 WHERE email = $2 AND attempttime = $3";
+			Database::getInstance()->doParamQuery($query2, array($time, $email, $earliest['attempttime']));
+		} 
+		else if(count($attempts) < 3 && count($attempts) >= 0) {
+			$time = time();
+			foreach($attempts as $attempt) {
+				if($time == $attempt["attempttime"]) $time++;
+			}
+			$query2 = "INSERT INTO  securitylab.loginattempts (email, attempttime) VALUES($1,$2)";
+			Database::getInstance()->doParamQuery($query2, array($email, $time));
+		}
+		else {
+			$query2 = "INSERT INTO  securitylab.loginattempts (email, attempttime) VALUES($1,$2)";
+			Database::getInstance()->doParamQuery($query2, array($email, time()));
+		}
+	}
+	return "Failed login!";
+}
 
 // Checks that request method is POST
 if ($_SERVER["REQUEST_METHOD"] == "POST"){
@@ -102,24 +151,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
             $userIsVerified = DbManager::isUserVerified($email);
 
 			// Login succeeded-path
-			if ($emailResult && $passwordResult){
+			if ($emailResult){
+				if(!isTimedOut($email)) {
+					if($passwordResult) {
+	
+						if ($userIsVerified){
+								// Create and give the user a JWT (token) as a session var
+								$token = array();
+								$token["username"] = getUsernameForEmail($email);
+								setcookie("logged_in", JWT::encode($token,
+										Config::getInstance()->getSetting("JWTSecretKey")),
+										0, "/", "", false, true);
 
-			    if ($userIsVerified){
-                    // Create and give the user a JWT (token) as a session var
-                    $token = array();
-                    $token["username"] = getUsernameForEmail($email);
-                    setcookie("logged_in", JWT::encode($token,
-                        Config::getInstance()->getSetting("JWTSecretKey")),
-                        0, "/", "", false, true);
+								// Set user messages
+								$response["message"] = "Login succeeded.";
+								$response["status"] = "success";
+						}
 
-                    // Set user messages
-                    $response["message"] = "Login succeeded.";
-                    $response["status"] = "success";
-                }
-
-                else {
-                    $response["message"] = "Account not verified.";
-                }
+						else {
+								$response["message"] = "Account not verified.";
+						}
+					} else {
+						$response["message"] = failedAttempt($email);
+					}
+				} else {
+					$response["message"] = "You are timed out";
+				}
 
 			}// Login failed-path
 			else{

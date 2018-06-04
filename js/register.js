@@ -63,49 +63,48 @@ function doRegister() {
         var password = byId("password-field").value;
         var passwordAgain = byId("password-again-field").value;
         var email = byId("email-field").value;
+      
+        //CHECK USERNAME SO IT IS NOT OVER 64 CHARS
+        if(username.length <= 64){
+          //Check so that password and password confirmation doesn't differ
+          if (password === passwordAgain && password.length >= 8 && password.length <= 64) {
 
-        //Check so that password and password confirmation doesn't differ
-        if(password === passwordAgain) {
+              // Check that e-mail has correct format
+              var emailRegex = /[\w]+@[\w]+\.[a-zA-Z]+/;
+              var usernameRegex = /^[a-zA-Z][a-zA-Z0-9_]+[a-zA-Z0-9]+$/;
 
-            // Check that e-mail has correct format
-            var emailRegex = /[\w]+@[\w]+\.[a-zA-Z]+/;
-            var usernameRegex = /^[a-zA-Z][a-zA-Z0-9_]+[a-zA-Z0-9]+$/;
+              if (username.match(usernameRegex)) {
 
-            if (username.match(usernameRegex)) {
+                  if (email.match(emailRegex)) {
 
-                if (email.match(emailRegex)) {
+                      // EventListener for server state change
+                      xhr.addEventListener('readystatechange', processRegister, false);
 
-                    // EventListener for server state change
-                    xhr.addEventListener('readystatechange', processRegister, false);
+                      // Message is composed and sent as JSON
+                      var data = JSON.stringify({
+                          "username": username,
+                          "password": password,
+                          "passwordAgain": passwordAgain,
+                          "email": email
+                      });
 
-                    // Should not be needed since we have Prepared statements and check when outputting from DB to the website.
-        /*                 username = encodeURIComponent(username);
-                    password = encodeURIComponent(password);
-                    passwordAgain = encodeURIComponent(passwordAgain);
-                    email = encodeURIComponent(email); */
+                      xhr.open("POST", "processRegister.php", true);
+                      xhr.setRequestHeader("Content-Type", "application/json");
+                      xhr.send(data);
 
-                    // Message is composed and sent as JSON
-                    var data = JSON.stringify({
-                        "username": username,
-                        "password": password,
-                        "passwordAgain": passwordAgain,
-                        "email": email
-                    });
-
-                    xhr.open("POST", "processRegister.php", true);
-                    xhr.setRequestHeader("Content-Type", "application/json");
-                    xhr.send(data);
-
-                }
-                else {
-                    byId("return-message").innerHTML = "E-mail has incorrect format.";
-                }
-            } else {
-                byId("return-message").innerHTML = "Username contains illegal chars."
-            }
+                  }
+                  else {
+                      byId("return-message").innerHTML = "E-mail has incorrect format.";
+                  }
+              } else {
+                  byId("return-message").innerHTML = "Username contains illegal chars."
+              }
+          else {
+              byId("return-message").innerHTML = "'Confirmation password' does not match 'password' OR password is not between 8-64 chars.";
+          }
         }
-        else{
-            byId("return-message").innerHTML = "'Confirmation password' does not match 'password'";
+        else {
+            byId("return-message").innerHTML = "Username is to long, max 64 chars";
         }
     }
 
